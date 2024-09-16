@@ -11,7 +11,7 @@ public class ChessMove {
 // to string method to show a board instead of giving addresses
     private final ChessPosition startPosition;
     private final ChessPosition endPosition;
-    private final ChessPiece.PieceType pieceType;
+    //private final ChessPiece.PieceType pieceType;
     private final ChessPiece.PieceType promotionPiece;
 
     public ChessMove(ChessPosition startPosition, ChessPosition endPosition,
@@ -19,7 +19,7 @@ public class ChessMove {
 
         this.startPosition = startPosition;
         this.endPosition = endPosition;
-        this.pieceType = pieceType;
+        //this.pieceType = pieceType;
         this.promotionPiece = promotionPiece;
     }
 
@@ -27,14 +27,16 @@ public class ChessMove {
      * @return ChessPosition of starting location
      */
     public ChessPosition getStartPosition() {
-        throw new RuntimeException("Not implemented");
+        return startPosition;
+        //throw new RuntimeException("Not implemented");
     }
 
     /**
      * @return ChessPosition of ending location
      */
     public ChessPosition getEndPosition() {
-        throw new RuntimeException("Not implemented");
+        return endPosition;
+        //throw new RuntimeException("Not implemented");
     }
 
     /**
@@ -44,7 +46,8 @@ public class ChessMove {
      * @return Type of piece to promote a pawn to, or null if no promotion
      */
     public ChessPiece.PieceType getPromotionPiece() {
-        return pieceType;
+        return promotionPiece;
         //throw new RuntimeException("Not implemented");
     }
+
 }
