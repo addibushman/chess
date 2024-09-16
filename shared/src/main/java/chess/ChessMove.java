@@ -11,15 +11,13 @@ public class ChessMove {
 // to string method to show a board instead of giving addresses
     private final ChessPosition startPosition;
     private final ChessPosition endPosition;
-    //private final ChessPiece.PieceType pieceType;
     private final ChessPiece.PieceType promotionPiece;
+
 
     public ChessMove(ChessPosition startPosition, ChessPosition endPosition,
                      ChessPiece.PieceType promotionPiece) {
-
         this.startPosition = startPosition;
         this.endPosition = endPosition;
-        //this.pieceType = pieceType;
         this.promotionPiece = promotionPiece;
     }
 
@@ -28,7 +26,6 @@ public class ChessMove {
      */
     public ChessPosition getStartPosition() {
         return startPosition;
-        //throw new RuntimeException("Not implemented");
     }
 
     /**
@@ -36,7 +33,6 @@ public class ChessMove {
      */
     public ChessPosition getEndPosition() {
         return endPosition;
-        //throw new RuntimeException("Not implemented");
     }
 
     /**
@@ -47,7 +43,25 @@ public class ChessMove {
      */
     public ChessPiece.PieceType getPromotionPiece() {
         return promotionPiece;
-        //throw new RuntimeException("Not implemented");
+    }
+    @Override
+    public String toString() {
+        return "Move from " + startPosition + " to " + endPosition +
+                (promotionPiece != null ? ", promote to " + promotionPiece : "");
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ChessMove)) return false;
+        ChessMove move = (ChessMove) o;
+        return Objects.equals(startPosition, move.startPosition) &&
+                Objects.equals(endPosition, move.endPosition) &&
+                promotionPiece == move.promotionPiece;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(startPosition, endPosition, promotionPiece);
+    }
 }
