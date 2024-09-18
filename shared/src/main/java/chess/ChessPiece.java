@@ -1,6 +1,5 @@
 package chess;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -37,7 +36,6 @@ public class ChessPiece {
      */
     public ChessGame.TeamColor getTeamColor() {
         return teamColor;
-        //throw new RuntimeException("Not implemented");
     }
 
     /**
@@ -45,7 +43,6 @@ public class ChessPiece {
      */
     public PieceType getPieceType() {
         return pieceType;
-        //throw new RuntimeException("Not implemented");
     }
 
     /**
@@ -56,8 +53,6 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        //What do I actually need to be returning here?
-        //return new ArrayList<>();
         return ChessMovesCalculator.calculateValidMoves(board, myPosition, this);
 
         }
