@@ -126,13 +126,32 @@ public class ChessMovesCalculator {
             }
         }
 
+        // Diagonal captures
+        int[][] diagonals = {{direction, 1}, {direction, -1}};
+        for (int[] diag : diagonals) {
+            int newRow = row + diag[0];
+            int newCol = col + diag[1];
+            if (isInBounds(newRow, newCol)) {
+                ChessPosition diagPos = new ChessPosition(newRow, newCol);
+                ChessPiece targetPiece = board.getPiece(diagPos);
+                if (targetPiece != null && targetPiece.getTeamColor() != piece.getTeamColor()) {
+                    moves.add(new ChessMove(position, diagPos, null));
+                }
+            }
+        }
+
         return moves;
     }
+
+
+
 
     // Helper to check board boundaries
     private static boolean isInBounds(int row, int col) {
         return row >= 1 && row <= 8 && col >= 1 && col <= 8;
     }
+
+
 
     // Helper to add directional moves
     private static void addDirectionalMoves(ChessBoard board, ChessPosition position, ChessPiece piece,
@@ -151,6 +170,7 @@ public class ChessMovesCalculator {
                 break;  // Stop if out of bounds
             }
 
+
             // Create the new position based on the updated row and col
             ChessPosition newPos = new ChessPosition(row, col);
             ChessPiece targetPiece = board.getPiece(newPos);  // Check if there's a piece at the new position
@@ -158,15 +178,17 @@ public class ChessMovesCalculator {
             if (targetPiece == null) {
                 // No piece in the target position, add move
                 moves.add(new ChessMove(position, newPos, null));
-//            } else {
-//                // There's a piece, check if it's an enemy
-//                if (targetPiece.getTeamColor() != piece.getTeamColor()) {
-//                    // Enemy piece, capture is allowed
-//                    moves.add(new ChessMove(position, newPos, null));
-//                }
-//                // Stop the loop after hitting any piece (friendly or enemy)
-//                break;
+            } else {
+                // There's a piece, check if it's an enemy
+                if (targetPiece.getTeamColor() != piece.getTeamColor()) {
+                    // Enemy piece, capture is allowed
+                    moves.add(new ChessMove(position, newPos, null));
+                }
+                // Stop the loop after hitting any piece (friendly or enemy)
+                break;
             }
+
         }
+
     }
 }

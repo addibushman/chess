@@ -46,7 +46,8 @@ public class ChessMove {
     public ChessPiece.PieceType getPromotionPiece() {
         return promotionPiece;
     }
-    //toString method
+
+
     @Override
     public String toString() {
         return "Move from " + startPosition.toString() + " to " + endPosition.toString() +
