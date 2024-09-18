@@ -53,6 +53,7 @@ public class ChessMove {
                 (promotionPiece != null ? ", promote to " + promotionPiece : "");
     }
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
