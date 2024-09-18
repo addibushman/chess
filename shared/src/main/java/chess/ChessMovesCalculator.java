@@ -105,7 +105,13 @@ public class ChessMovesCalculator {
         return moves;
     }
 
-    // PAWN move calculation
+
+    private static boolean isPromotionRow(ChessPosition position, ChessPiece piece) {
+        return (piece.getTeamColor() == ChessGame.TeamColor.WHITE && position.getRow() == 8) ||
+                (piece.getTeamColor() == ChessGame.TeamColor.BLACK && position.getRow() == 1);
+    }
+
+    //PAWN move calculation
     private static Collection<ChessMove> calculatePawnMoves(ChessBoard board, ChessPosition position, ChessPiece piece) {
         Collection<ChessMove> moves = new ArrayList<>();
         int direction = (piece.getTeamColor() == ChessGame.TeamColor.WHITE) ? 1 : -1;
@@ -114,9 +120,21 @@ public class ChessMovesCalculator {
 
         ChessPosition oneStepForward = new ChessPosition(row + direction, col);
         if (board.getPiece(oneStepForward) == null) {
-            moves.add(new ChessMove(position, oneStepForward, null));
+            // Check for promotion if moving to the final row
+            if ((piece.getTeamColor() == ChessGame.TeamColor.WHITE && row + direction == 8) ||
+                    (piece.getTeamColor() == ChessGame.TeamColor.BLACK && row + direction == 1)) {
+                // Promotion move
+                moves.add(new ChessMove(position, oneStepForward, ChessPiece.PieceType.QUEEN));
+                moves.add(new ChessMove(position, oneStepForward, ChessPiece.PieceType.ROOK));
+                moves.add(new ChessMove(position, oneStepForward, ChessPiece.PieceType.KNIGHT));
+                moves.add(new ChessMove(position, oneStepForward, ChessPiece.PieceType.BISHOP));
+                // Assuming QUEEN promotion here
+            } else {
+                // Normal move
+                moves.add(new ChessMove(position, oneStepForward, null));
+            }
 
-            // Two-step forward (only first move for a pawn can do this)
+            // Two-step forward (only for pawn's first move)
             if ((piece.getTeamColor() == ChessGame.TeamColor.WHITE && row == 2) ||
                     (piece.getTeamColor() == ChessGame.TeamColor.BLACK && row == 7)) {
                 ChessPosition twoStepsForward = new ChessPosition(row + 2 * direction, col);
@@ -126,7 +144,7 @@ public class ChessMovesCalculator {
             }
         }
 
-        // Diagonal captures
+        // Diagonal captures (and potential promotion)
         int[][] diagonals = {{direction, 1}, {direction, -1}};
         for (int[] diag : diagonals) {
             int newRow = row + diag[0];
@@ -135,39 +153,41 @@ public class ChessMovesCalculator {
                 ChessPosition diagPos = new ChessPosition(newRow, newCol);
                 ChessPiece targetPiece = board.getPiece(diagPos);
                 if (targetPiece != null && targetPiece.getTeamColor() != piece.getTeamColor()) {
-                    moves.add(new ChessMove(position, diagPos, null));
+                    if ((piece.getTeamColor() == ChessGame.TeamColor.WHITE && newRow == 8) ||
+                            (piece.getTeamColor() == ChessGame.TeamColor.BLACK && newRow == 1)) {
+                        // Promotion to be any piece, how do I do that??
+                        moves.add(new ChessMove(position, diagPos, ChessPiece.PieceType.QUEEN));
+                        moves.add(new ChessMove(position, diagPos, ChessPiece.PieceType.ROOK));
+                        moves.add(new ChessMove(position, diagPos, ChessPiece.PieceType.BISHOP));
+                        moves.add(new ChessMove(position, diagPos, ChessPiece.PieceType.KNIGHT));
+                    } else {
+                        moves.add(new ChessMove(position, diagPos, null));
+                    }
                 }
             }
         }
 
         return moves;
     }
-
-
-
-
     // Helper to check board boundaries
     private static boolean isInBounds(int row, int col) {
         return row >= 1 && row <= 8 && col >= 1 && col <= 8;
     }
 
 
-
     // Helper to add directional moves
     private static void addDirectionalMoves(ChessBoard board, ChessPosition position, ChessPiece piece,
                                             Collection<ChessMove> moves, int rowDelta, int colDelta) {
-        int row = position.getRow();  // Start from current row
-        int col = position.getColumn();  // Start from current column
+        int row = position.getRow();
+        int col = position.getColumn();
 
         while (true) {
-            // Apply the deltas to move in the specified direction
-            //switching between - and + cause its going in the wrong direction
             row -= rowDelta;
             col -= colDelta;
 
             // Check if the new row and column are within bounds (on the board)
             if (!isInBounds(row, col)) {
-                break;  // Stop if out of bounds
+                break;
             }
 
 
@@ -184,7 +204,6 @@ public class ChessMovesCalculator {
                     // Enemy piece, capture is allowed
                     moves.add(new ChessMove(position, newPos, null));
                 }
-                // Stop the loop after hitting any piece (friendly or enemy)
                 break;
             }
 
