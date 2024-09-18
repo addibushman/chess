@@ -1,5 +1,7 @@
 package chess;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Objects;
 /**
  * Represents moving a chess piece on a chessboard
@@ -8,7 +10,7 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessMove {
-// to string method to show a board instead of giving addresses
+
     private final ChessPosition startPosition;
     private final ChessPosition endPosition;
     private final ChessPiece.PieceType promotionPiece;
@@ -44,6 +46,7 @@ public class ChessMove {
     public ChessPiece.PieceType getPromotionPiece() {
         return promotionPiece;
     }
+    //toString method
     @Override
     public String toString() {
         return "Move from " + startPosition.toString() + " to " + endPosition.toString() +
