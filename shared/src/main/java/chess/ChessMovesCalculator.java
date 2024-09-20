@@ -105,12 +105,6 @@ public class ChessMovesCalculator {
         return moves;
     }
 
-
-    private static boolean isPromotionRow(ChessPosition position, ChessPiece piece) {
-        return (piece.getTeamColor() == ChessGame.TeamColor.WHITE && position.getRow() == 8) ||
-                (piece.getTeamColor() == ChessGame.TeamColor.BLACK && position.getRow() == 1);
-    }
-
     //PAWN move calculation
     private static Collection<ChessMove> calculatePawnMoves(ChessBoard board, ChessPosition position, ChessPiece piece) {
         Collection<ChessMove> moves = new ArrayList<>();
@@ -121,16 +115,15 @@ public class ChessMovesCalculator {
         ChessPosition oneStepForward = new ChessPosition(row + direction, col);
         if (board.getPiece(oneStepForward) == null) {
             // Check for promotion if moving to the final row
-            if ((piece.getTeamColor() == ChessGame.TeamColor.WHITE && row + direction == 8) ||
-                    (piece.getTeamColor() == ChessGame.TeamColor.BLACK && row + direction == 1)) {
+            if ((piece.getTeamColor() == ChessGame.TeamColor.WHITE && oneStepForward.getRow() == 8) ||
+                    (piece.getTeamColor() == ChessGame.TeamColor.BLACK && oneStepForward.getRow() == 1)) {
                 // Promotion move
                 moves.add(new ChessMove(position, oneStepForward, ChessPiece.PieceType.QUEEN));
                 moves.add(new ChessMove(position, oneStepForward, ChessPiece.PieceType.ROOK));
                 moves.add(new ChessMove(position, oneStepForward, ChessPiece.PieceType.KNIGHT));
                 moves.add(new ChessMove(position, oneStepForward, ChessPiece.PieceType.BISHOP));
-                // Assuming QUEEN promotion here
             } else {
-                // Normal move
+                // Normal move if not promotion
                 moves.add(new ChessMove(position, oneStepForward, null));
             }
 

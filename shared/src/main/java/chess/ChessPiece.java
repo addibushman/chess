@@ -68,6 +68,16 @@ public class ChessPiece {
     @Override
     public int hashCode() {
         return Objects.hash(teamColor, pieceType);
+
+
+    }
+
+    @Override
+    public String toString() {
+        return "ChessPiece{" +
+                "teamColor=" + teamColor +
+                ", pieceType=" + pieceType +
+                '}';
     }
 }
 
