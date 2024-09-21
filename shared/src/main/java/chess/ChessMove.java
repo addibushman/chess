@@ -1,7 +1,5 @@
 package chess;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Objects;
 /**
  * Represents moving a chess piece on a chessboard
@@ -10,7 +8,7 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessMove {
-
+//initialize variables, this is easy, they are given as parameters already in ChessMove constructor, thank you
     private final ChessPosition startPosition;
     private final ChessPosition endPosition;
     private final ChessPiece.PieceType promotionPiece;
@@ -18,6 +16,7 @@ public class ChessMove {
 
     public ChessMove(ChessPosition startPosition, ChessPosition endPosition,
                      ChessPiece.PieceType promotionPiece) {
+        //now just assign, couldn't be more straight forward
         this.startPosition = startPosition;
         this.endPosition = endPosition;
         this.promotionPiece = promotionPiece;
@@ -26,6 +25,7 @@ public class ChessMove {
     /**
      * @return ChessPosition of starting location
      */
+    //I think I'll use this later in Phase 1
     public ChessPosition getStartPosition() {
         return startPosition;
     }
@@ -33,6 +33,7 @@ public class ChessMove {
     /**
      * @return ChessPosition of ending location
      */
+    //I think I'll use this later in Phase 1
     public ChessPosition getEndPosition() {
         return endPosition;
     }
@@ -43,11 +44,12 @@ public class ChessMove {
      *
      * @return Type of piece to promote a pawn to, or null if no promotion
      */
+    //Ill use this later in Phase 1, just gotta return for now
     public ChessPiece.PieceType getPromotionPiece() {
         return promotionPiece;
     }
 
-
+//Java can generate these 3 for me, phew
     @Override
     public String toString() {
         return "Move from " + startPosition.toString() + " to " + endPosition.toString() +

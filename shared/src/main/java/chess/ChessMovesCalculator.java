@@ -1,10 +1,10 @@
 package chess;
-
+//don't forget to import okay
 import java.util.ArrayList;
 import java.util.Collection;
 
 public class ChessMovesCalculator {
-
+//think of a slide, directly going to what it needs to do, faster than if statements, hopefully this will make the programming exam easier
     public static Collection<ChessMove> calculateValidMoves(ChessBoard board, ChessPosition position, ChessPiece piece) {
         switch (piece.getPieceType()) {
             case KING:
@@ -24,18 +24,20 @@ public class ChessMovesCalculator {
         }
     }
 
+    //order pieces from most to least important (easier to think about so I don't miss one)
+
     // KING move calculation
     private static Collection<ChessMove> calculateKingMoves(ChessBoard board, ChessPosition position, ChessPiece piece) {
         Collection<ChessMove> moves = new ArrayList<>();
         int[][] directions = {
                 {1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {-1, -1}, {1, -1}, {-1, 1}
         };
-
+// this is doing an array of arrays, so you can go from 2 dimensions to 1, making it easier to digest
         for (int[] dir : directions) {
             int newRow = position.getRow() + dir[0];
             int newCol = position.getColumn() + dir[1];
 
-            if (isInBounds(newRow, newCol)) {
+            if (isOnBoard(newRow, newCol)) {
                 ChessPosition newPos = new ChessPosition(newRow, newCol);
                 ChessPiece targetPiece = board.getPiece(newPos);
                 if (targetPiece == null || targetPiece.getTeamColor() != piece.getTeamColor()) {
@@ -46,7 +48,8 @@ public class ChessMovesCalculator {
         return moves;
     }
 
-    // QUEEN move calculation
+    //order pieces from most to least important
+    // QUEEN move calculation, mix of ROOK and BISHOP, make this easier for yourself
     private static Collection<ChessMove> calculateQueenMoves(ChessBoard board, ChessPosition position, ChessPiece piece) {
         Collection<ChessMove> moves = new ArrayList<>();
         moves.addAll(calculateRookMoves(board, position, piece));
@@ -54,35 +57,35 @@ public class ChessMovesCalculator {
         return moves;
     }
 
-    // ROOK move calculation
+    // ROOK move calculation, straight in all direction
     private static Collection<ChessMove> calculateRookMoves(ChessBoard board, ChessPosition position, ChessPiece piece) {
         Collection<ChessMove> moves = new ArrayList<>();
         int[][] directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
 
         for (int[] dir : directions) {
-            addDirectionalMoves(board, position, piece, moves, dir[0], dir[1]);
+            addMoveLength(board, position, piece, moves, dir[0], dir[1]);
         }
         return moves;
     }
 
-    // BISHOP move calculation
+    // BISHOP move calculation, all diagonal
     private static Collection<ChessMove> calculateBishopMoves(ChessBoard board, ChessPosition position, ChessPiece piece) {
         Collection<ChessMove> moves = new ArrayList<>();
 
-        // Correct the direction order
+        // Direction order don't matter heck ya, that makes it easier
         int[][] directions = {
                 {-1, 1}, {-1, -1}, {1, 1}, {1, -1}
         };
 
         for (int[] dir : directions) {
-            addDirectionalMoves(board, position, piece, moves, dir[0], dir[1]);
+            addMoveLength(board, position, piece, moves, dir[0], dir[1]);
 
         }
         return moves;
 
     }
 
-    // KNIGHT move calculation
+    // KNIGHT move calculation, this is the funky one, 3 over 1 up, and all variations of this
     private static Collection<ChessMove> calculateKnightMoves(ChessBoard board, ChessPosition position, ChessPiece piece) {
         Collection<ChessMove> moves = new ArrayList<>();
         int[][] knightMoves = {
@@ -94,7 +97,7 @@ public class ChessMovesCalculator {
             int newRow = position.getRow() + move[0];
             int newCol = position.getColumn() + move[1];
 
-            if (isInBounds(newRow, newCol)) {
+            if (isOnBoard(newRow, newCol)) {
                 ChessPosition newPos = new ChessPosition(newRow, newCol);
                 ChessPiece targetPiece = board.getPiece(newPos);
                 if (targetPiece == null || targetPiece.getTeamColor() != piece.getTeamColor()) {
@@ -105,7 +108,7 @@ public class ChessMovesCalculator {
         return moves;
     }
 
-    //PAWN move calculation
+    //PAWN move calculation woo wooo, this is supposed to be the hard one
     private static Collection<ChessMove> calculatePawnMoves(ChessBoard board, ChessPosition position, ChessPiece piece) {
         Collection<ChessMove> moves = new ArrayList<>();
         int direction = (piece.getTeamColor() == ChessGame.TeamColor.WHITE) ? 1 : -1;
@@ -114,7 +117,7 @@ public class ChessMovesCalculator {
 
         ChessPosition oneStepForward = new ChessPosition(row + direction, col);
         if (board.getPiece(oneStepForward) == null) {
-            // Check for promotion if moving to the final row
+            // Check for promotion if moving to the final row on board
             if ((piece.getTeamColor() == ChessGame.TeamColor.WHITE && oneStepForward.getRow() == 8) ||
                     (piece.getTeamColor() == ChessGame.TeamColor.BLACK && oneStepForward.getRow() == 1)) {
                 // Promotion move
@@ -123,7 +126,7 @@ public class ChessMovesCalculator {
                 moves.add(new ChessMove(position, oneStepForward, ChessPiece.PieceType.KNIGHT));
                 moves.add(new ChessMove(position, oneStepForward, ChessPiece.PieceType.BISHOP));
             } else {
-                // Normal move if not promotion
+                // Normal move if not promotion, also do I need this part or am I reiterating too much?
                 moves.add(new ChessMove(position, oneStepForward, null));
             }
 
@@ -137,12 +140,12 @@ public class ChessMovesCalculator {
             }
         }
 
-        // Diagonal captures (and potential promotion)
+        // Pawn can capture Diagonally (and be a potential promotion too)
         int[][] diagonals = {{direction, 1}, {direction, -1}};
         for (int[] diag : diagonals) {
             int newRow = row + diag[0];
             int newCol = col + diag[1];
-            if (isInBounds(newRow, newCol)) {
+            if (isOnBoard(newRow, newCol)) {
                 ChessPosition diagPos = new ChessPosition(newRow, newCol);
                 ChessPiece targetPiece = board.getPiece(diagPos);
                 if (targetPiece != null && targetPiece.getTeamColor() != piece.getTeamColor()) {
@@ -162,39 +165,39 @@ public class ChessMovesCalculator {
 
         return moves;
     }
-    // Helper to check board boundaries
-    private static boolean isInBounds(int row, int col) {
+    // Helper function to check board boundaries (to know when to stop, or to know if it is a valid move)
+    private static boolean isOnBoard(int row, int col) {
         return row >= 1 && row <= 8 && col >= 1 && col <= 8;
     }
 
 
-    // Helper to add directional moves
-    private static void addDirectionalMoves(ChessBoard board, ChessPosition position, ChessPiece piece,
-                                            Collection<ChessMove> moves, int rowDelta, int colDelta) {
+    // Helper to add directional moves, this way you can pick direction and not worry about how many to do each time
+    private static void addMoveLength(ChessBoard board, ChessPosition position, ChessPiece piece,
+                                            Collection<ChessMove> moves, int rowChange, int colChange) {
         int row = position.getRow();
         int col = position.getColumn();
 
         while (true) {
-            row -= rowDelta;
-            col -= colDelta;
+            row -= rowChange;
+            col -= colChange;
 
-            // Check if the new row and column are within bounds (on the board)
-            if (!isInBounds(row, col)) {
+            // Check if the new row and column are on the board before setting position to be there
+            if (!isOnBoard(row, col)) {
                 break;
             }
 
 
-            // Create the new position based on the updated row and col
+            // Create the new position based given updated row and col
             ChessPosition newPos = new ChessPosition(row, col);
-            ChessPiece targetPiece = board.getPiece(newPos);  // Check if there's a piece at the new position
+            ChessPiece proposedPiecePosition = board.getPiece(newPos);  // Check if there's a piece at the position you wanna go to
 
-            if (targetPiece == null) {
-                // No piece in the target position, add move
+            if (proposedPiecePosition == null) {
+                // No piece there, you are so good to add move
                 moves.add(new ChessMove(position, newPos, null));
             } else {
-                // There's a piece, check if it's an enemy
-                if (targetPiece.getTeamColor() != piece.getTeamColor()) {
-                    // Enemy piece, capture is allowed
+                // There's a piece at that position you wanna go to, check if it's the enemy
+                if (proposedPiecePosition.getTeamColor() != piece.getTeamColor()) {
+                    // Enemy piece, capture is allowed heck ya
                     moves.add(new ChessMove(position, newPos, null));
                 }
                 break;

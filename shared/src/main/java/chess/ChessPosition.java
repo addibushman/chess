@@ -9,10 +9,10 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessPosition {
-
+//initialize row and col
     private final int row;
     private final int col;
-
+//now in object return this
     public ChessPosition(int row, int col) {
         this.row = row;
         this.col = col;
@@ -22,6 +22,8 @@ public class ChessPosition {
      * @return which row this position is in
      * 1 codes for the bottom row
      */
+
+    //obviously
     public int getRow() {
         return row;
     }
@@ -30,10 +32,11 @@ public class ChessPosition {
      * @return which column this position is in
      * 1 codes for the left row
      */
+    //duh
     public int getColumn() {
         return col;
     }
-
+//Java can generate this part for me, yayay
     @Override
     public String toString() {
         return "ChessPosition{" +

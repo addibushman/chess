@@ -11,9 +11,13 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessPiece {
+    //initialize first por favor
     private final ChessGame.TeamColor teamColor;
     private final PieceType pieceType;
+
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
+        //this means you are in the object, gotta do something with what you initialized, before it could be anything
+        //if you left this part empty, but now it can only be what you assigned to it
         this.teamColor = pieceColor;
         this.pieceType = type;
     }
@@ -22,6 +26,7 @@ public class ChessPiece {
     /**
      * The various different chess piece options
      */
+    //thank you for this
     public enum PieceType {
         KING,
         QUEEN,
@@ -34,6 +39,7 @@ public class ChessPiece {
     /**
      * @return Which team this chess piece belongs to
      */
+    //duh
     public ChessGame.TeamColor getTeamColor() {
         return teamColor;
     }
@@ -41,6 +47,7 @@ public class ChessPiece {
     /**
      * @return which type of chess piece this piece is
      */
+    //easy, what else would you return
     public PieceType getPieceType() {
         return pieceType;
     }
@@ -52,11 +59,12 @@ public class ChessPiece {
      *
      * @return Collection of valid moves
      */
+    //collection is a generic list, takes in board and position, and based on that it can do the calculator part
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         return ChessMovesCalculator.calculateValidMoves(board, myPosition, this);
 
         }
-
+//Java generates equals, hashcode, and toString for you, blessed day
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
