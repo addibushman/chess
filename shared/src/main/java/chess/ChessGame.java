@@ -158,6 +158,36 @@ public class ChessGame {
         return board;
     }
 
+    private Collection<ChessMove> getEnPassantMoves(ChessPosition pawnPosition, TeamColor color) {
+        Collection<ChessMove> enPassantMoves = new ArrayList<>();
+        ChessPosition lastDoublePawnMove = null;
+
+        //if (lastDoublePawnMove == null) return enPassantMoves;
+
+        int direction = (color == TeamColor.WHITE) ? 1 : -1;
+        int row = pawnPosition.getRow();
+        int col = pawnPosition.getColumn();
+
+        // Check if our pawn is in the right position
+        if ((color == TeamColor.WHITE && row != 5) || (color == TeamColor.BLACK && row != 4)) {
+            return enPassantMoves;
+        }
+
+        // Check adjacent columns for enemy pawns that just moved
+        for (int colOffset : new int[]{-1, 1}) {
+            if (col + colOffset >= 1 && col + colOffset <= 8) {
+                if (lastDoublePawnMove.getColumn() == col + colOffset &&
+                        lastDoublePawnMove.getRow() == row) {
+                    ChessPosition endPos = new ChessPosition(row + direction, col + colOffset);
+                    enPassantMoves.add(new ChessMove(pawnPosition, endPos, null));
+                }
+            }
+        }
+
+        return enPassantMoves;
+    }
+
+
     // Helper methods here and below
     private boolean isInCheck(TeamColor teamColor, ChessBoard board) {
         //need to check all possibilites here
