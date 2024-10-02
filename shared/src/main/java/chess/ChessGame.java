@@ -157,7 +157,7 @@ public class ChessGame {
     public ChessBoard getBoard() {
         return board;
     }
-
+// start of extra credit
     private Collection<ChessMove> getEnPassantMoves(ChessPosition pawnPosition, TeamColor color) {
         Collection<ChessMove> enPassantMoves = new ArrayList<>();
         ChessPosition lastDoublePawnMove = null;
@@ -185,9 +185,35 @@ public class ChessGame {
         }
 
         return enPassantMoves;
+    }private void handleCastling(ChessMove move) {
+        int row = move.getStartPosition().getRow();
+        int rookStartCol = move.getEndPosition().getColumn() == 7 ? 8 : 1;
+        int rookEndCol = move.getEndPosition().getColumn() == 7 ? 6 : 4;
+
+        // Move king
+        board.addPiece(move.getEndPosition(), board.getPiece(move.getStartPosition()));
+        board.addPiece(move.getStartPosition(), null);
+
+        // Move rook
+        ChessPosition rookStart = new ChessPosition(row, rookStartCol);
+        ChessPosition rookEnd = new ChessPosition(row, rookEndCol);
+        board.addPiece(rookEnd, board.getPiece(rookStart));
+        board.addPiece(rookStart, null);
+    }
+
+    private void handleEnPassant(ChessMove move) {
+        // Move the pawn
+        board.addPiece(move.getEndPosition(), board.getPiece(move.getStartPosition()));
+        board.addPiece(move.getStartPosition(), null);
+
+        // Remove the captured pawn
+        int capturedPawnRow = move.getStartPosition().getRow();
+        int capturedPawnCol = move.getEndPosition().getColumn();
+        board.addPiece(new ChessPosition(capturedPawnRow, capturedPawnCol), null);
     }
 
 
+//end of extra credit
     // Helper methods here and below
     private boolean isInCheck(TeamColor teamColor, ChessBoard board) {
         //need to check all possibilites here
