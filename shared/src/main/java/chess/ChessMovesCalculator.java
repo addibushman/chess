@@ -117,20 +117,17 @@ public class ChessMovesCalculator {
 
         ChessPosition oneStepForward = new ChessPosition(row + direction, col);
         if (board.getPiece(oneStepForward) == null) {
-            // Check for promotion if moving to the final row on board
             if ((piece.getTeamColor() == ChessGame.TeamColor.WHITE && oneStepForward.getRow() == 8) ||
                     (piece.getTeamColor() == ChessGame.TeamColor.BLACK && oneStepForward.getRow() == 1)) {
-                // Promotion move
                 moves.add(new ChessMove(position, oneStepForward, ChessPiece.PieceType.QUEEN));
                 moves.add(new ChessMove(position, oneStepForward, ChessPiece.PieceType.ROOK));
                 moves.add(new ChessMove(position, oneStepForward, ChessPiece.PieceType.KNIGHT));
                 moves.add(new ChessMove(position, oneStepForward, ChessPiece.PieceType.BISHOP));
             } else {
-                // Normal move if not promotion, also do I need this part or am I reiterating too much?
+
                 moves.add(new ChessMove(position, oneStepForward, null));
             }
 
-            // Two-step forward (only for pawn's first move)
             if ((piece.getTeamColor() == ChessGame.TeamColor.WHITE && row == 2) ||
                     (piece.getTeamColor() == ChessGame.TeamColor.BLACK && row == 7)) {
                 ChessPosition twoStepsForward = new ChessPosition(row + 2 * direction, col);
@@ -139,9 +136,7 @@ public class ChessMovesCalculator {
                 }
             }
         }
-
-        // Pawn can capture Diagonally (and be a potential promotion too)
-        int[][] diagonals = {{direction, 1}, {direction, -1}};
+        int[][] diagonals = {{direction, 1}, {direction, - 1}};
         for (int[] diag : diagonals) {
             int newRow = row + diag[0];
             int newCol = col + diag[1];
@@ -173,20 +168,17 @@ public class ChessMovesCalculator {
 
     // Helper to add directional moves, this way you can pick direction and not worry about how many to do each time
     private static void addMoveLength(ChessBoard board, ChessPosition position, ChessPiece piece,
-                                            Collection<ChessMove> moves, int rowChange, int colChange) {
+                                      Collection<ChessMove> moves, int rowChange, int colChange) {
         int row = position.getRow();
         int col = position.getColumn();
 
         while (true) {
             row -= rowChange;
             col -= colChange;
-
             // Check if the new row and column are on the board before setting position to be there
             if (!isOnBoard(row, col)) {
                 break;
             }
-
-
             // Create the new position based given updated row and col
             ChessPosition newPos = new ChessPosition(row, col);
             ChessPiece proposedPiecePosition = board.getPiece(newPos);  // Check if there's a piece at the position you wanna go to
