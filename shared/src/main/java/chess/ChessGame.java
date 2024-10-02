@@ -157,8 +157,9 @@ public class ChessGame {
     public ChessBoard getBoard() {
         return board;
     }
-// start of extra credit
-private ChessPosition lastDoublePawnMove = null;
+
+    // start of extra credit
+    private ChessPosition lastDoublePawnMove = null;
     private boolean[][] hasMoved = new boolean[8][8]; // Track if pieces have moved
 
     // Modify your resetBoard method to also reset piece movement tracking
@@ -187,17 +188,7 @@ private ChessPosition lastDoublePawnMove = null;
         if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
             possibleMoves.addAll(getEnPassantMoves(startPosition, piece.getTeamColor()));
         }
-
-        Collection<ChessMove> validMoves = new ArrayList<>();
-        for (ChessMove move : possibleMoves) {
-            ChessBoard tempBoard = copyBoard();
-            makeTemporaryMove(tempBoard, move);
-            if (!isInCheck(piece.getTeamColor(), tempBoard)) {
-                validMoves.add(move);
-            }
-        }
-
-        return validMoves;
+        return null;
     }
 
     // Add these methods to your ChessGame class
@@ -206,18 +197,18 @@ private ChessPosition lastDoublePawnMove = null;
         int row = kingPosition.getRow();
 
         // Check if king has moved
-        if (hasMoved[row-1][4]) return castlingMoves;
+        if (hasMoved[row - 1][4]) return castlingMoves;
 
         // Check if king is in check
         if (isInCheck(color)) return castlingMoves;
 
         // Try kingside castling
-        if (!hasMoved[row-1][7] && canCastle(kingPosition, true)) {
+        if (!hasMoved[row - 1][7] && canCastle(kingPosition, true)) {
             castlingMoves.add(new ChessMove(kingPosition, new ChessPosition(row, 7), null));
         }
 
         // Try queenside castling
-        if (!hasMoved[row-1][0] && canCastle(kingPosition, false)) {
+        if (!hasMoved[row - 1][0] && canCastle(kingPosition, false)) {
             castlingMoves.add(new ChessMove(kingPosition, new ChessPosition(row, 3), null));
         }
 
@@ -280,57 +271,6 @@ private ChessPosition lastDoublePawnMove = null;
         return enPassantMoves;
     }
 
-    // Modify your makeMove method
-    public void makeMove(ChessMove move) throws InvalidMoveException {
-        ChessPiece piece = board.getPiece(move.getStartPosition());
-
-        if (piece == null) {
-            throw new InvalidMoveException("No piece at start position");
-        }
-
-        if (piece.getTeamColor() != teamTurn) {
-            throw new InvalidMoveException("Not your turn");
-        }
-
-        Collection<ChessMove> validMoves = validMoves(move.getStartPosition());
-        if (!validMoves.contains(move)) {
-            throw new InvalidMoveException("Invalid move");
-        }
-
-        // Track piece movement
-        hasMoved[move.getStartPosition().getRow()-1][move.getStartPosition().getColumn()-1] = true;
-
-        // Handle castling
-        if (piece.getPieceType() == ChessPiece.PieceType.KING) {
-            int colDiff = move.getEndPosition().getColumn() - move.getStartPosition().getColumn();
-            if (Math.abs(colDiff) == 2) {
-                handleCastling(move);
-                teamTurn = (teamTurn == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
-                return;
-            }
-        }
-
-        // Handle en passant capture
-        if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
-            int rowDiff = move.getEndPosition().getRow() - move.getStartPosition().getRow();
-            if (Math.abs(rowDiff) == 2) {
-                lastDoublePawnMove = move.getEndPosition();
-            } else {
-                lastDoublePawnMove = null;
-            }
-
-            // Check if this is an en passant capture
-            if (move.getEndPosition().getColumn() != move.getStartPosition().getColumn() &&
-                    board.getPiece(move.getEndPosition()) == null) {
-                handleEnPassant(move);
-                teamTurn = (teamTurn == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
-                return;
-            }
-        }
-
-        executeMove(move);
-        teamTurn = (teamTurn == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
-    }
 
     private void handleCastling(ChessMove move) {
         int row = move.getStartPosition().getRow();
