@@ -158,151 +158,10 @@ public class ChessGame {
         return board;
     }
 
-    // start of extra credit
-    private ChessPosition lastDoublePawnMove = null;
-    private boolean[][] hasMoved = new boolean[8][8]; // Track if pieces have moved
-
-    // Modify your resetBoard method to also reset piece movement tracking
-    public void resetBoard() {
-        board = new ChessBoard();
-        board.resetBoard();
-        hasMoved = new boolean[8][8];
-        lastDoublePawnMove = null;
-    }
-
-    // Add to your validMoves method
-    public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        ChessPiece piece = board.getPiece(startPosition);
-        if (piece == null) {
-            return null;
-        }
-
-        Collection<ChessMove> possibleMoves = new ArrayList<>(piece.pieceMoves(board, startPosition));
-
-        // Add castling moves for King
-        if (piece.getPieceType() == ChessPiece.PieceType.KING) {
-            possibleMoves.addAll(getCastlingMoves(startPosition, piece.getTeamColor()));
-        }
-
-        // Add en passant moves for Pawns
-        if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
-            possibleMoves.addAll(getEnPassantMoves(startPosition, piece.getTeamColor()));
-        }
-        return null;
-    }
-
-    // Add these methods to your ChessGame class
-    private Collection<ChessMove> getCastlingMoves(ChessPosition kingPosition, TeamColor color) {
-        Collection<ChessMove> castlingMoves = new ArrayList<>();
-        int row = kingPosition.getRow();
-
-        // Check if king has moved
-        if (hasMoved[row - 1][4]) return castlingMoves;
-
-        // Check if king is in check
-        if (isInCheck(color)) return castlingMoves;
-
-        // Try kingside castling
-        if (!hasMoved[row - 1][7] && canCastle(kingPosition, true)) {
-            castlingMoves.add(new ChessMove(kingPosition, new ChessPosition(row, 7), null));
-        }
-
-        // Try queenside castling
-        if (!hasMoved[row - 1][0] && canCastle(kingPosition, false)) {
-            castlingMoves.add(new ChessMove(kingPosition, new ChessPosition(row, 3), null));
-        }
-
-        return castlingMoves;
-    }
-
-    private boolean canCastle(ChessPosition kingPosition, boolean kingSide) {
-        int row = kingPosition.getRow();
-        int startCol = kingSide ? 6 : 1;
-        int endCol = kingSide ? 7 : 4;
-
-        // Check if squares between king and rook are empty
-        for (int col = startCol; col < endCol; col++) {
-            if (board.getPiece(new ChessPosition(row, col)) != null) {
-                return false;
-            }
-        }
-
-        // Check if king passes through check
-        TeamColor color = board.getPiece(kingPosition).getTeamColor();
-        ChessBoard tempBoard = copyBoard();
-        int direction = kingSide ? 1 : -1;
-        for (int i = 1; i <= 2; i++) {
-            ChessPosition newKingPos = new ChessPosition(row, kingPosition.getColumn() + (i * direction));
-            tempBoard.addPiece(kingPosition, null);
-            tempBoard.addPiece(newKingPos, board.getPiece(kingPosition));
-            if (isInCheck(color, tempBoard)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private Collection<ChessMove> getEnPassantMoves(ChessPosition pawnPosition, TeamColor color) {
-        Collection<ChessMove> enPassantMoves = new ArrayList<>();
-
-        if (lastDoublePawnMove == null) return enPassantMoves;
-
-        int direction = (color == TeamColor.WHITE) ? 1 : -1;
-        int row = pawnPosition.getRow();
-        int col = pawnPosition.getColumn();
-
-        // Check if our pawn is in the right position
-        if ((color == TeamColor.WHITE && row != 5) || (color == TeamColor.BLACK && row != 4)) {
-            return enPassantMoves;
-        }
-
-        // Check adjacent columns for enemy pawns that just moved
-        for (int colOffset : new int[]{-1, 1}) {
-            if (col + colOffset >= 1 && col + colOffset <= 8) {
-                if (lastDoublePawnMove.getColumn() == col + colOffset &&
-                        lastDoublePawnMove.getRow() == row) {
-                    ChessPosition endPos = new ChessPosition(row + direction, col + colOffset);
-                    enPassantMoves.add(new ChessMove(pawnPosition, endPos, null));
-                }
-            }
-        }
-
-        return enPassantMoves;
-    }
-
-
-    private void handleCastling(ChessMove move) {
-        int row = move.getStartPosition().getRow();
-        int rookStartCol = move.getEndPosition().getColumn() == 7 ? 8 : 1;
-        int rookEndCol = move.getEndPosition().getColumn() == 7 ? 6 : 4;
-
-        // Move king
-        board.addPiece(move.getEndPosition(), board.getPiece(move.getStartPosition()));
-        board.addPiece(move.getStartPosition(), null);
-
-        // Move rook
-        ChessPosition rookStart = new ChessPosition(row, rookStartCol);
-        ChessPosition rookEnd = new ChessPosition(row, rookEndCol);
-        board.addPiece(rookEnd, board.getPiece(rookStart));
-        board.addPiece(rookStart, null);
-    }
-
-    private void handleEnPassant(ChessMove move) {
-        // Move the pawn
-        board.addPiece(move.getEndPosition(), board.getPiece(move.getStartPosition()));
-        board.addPiece(move.getStartPosition(), null);
-
-        // Remove the captured pawn
-        int capturedPawnRow = move.getStartPosition().getRow();
-        int capturedPawnCol = move.getEndPosition().getColumn();
-        board.addPiece(new ChessPosition(capturedPawnRow, capturedPawnCol), null);
-    }
-//end of extra credit
     // Helper methods here and below
     private boolean isInCheck(TeamColor teamColor, ChessBoard board) {
         //need to check all possibilites here
-        ChessPosition kingPosition = findKing(teamColor, board);
+        ChessPosition kingPosition = findTheKing(teamColor, board);
         TeamColor opponentColor = (teamColor == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
 
         for (int row = 1; row <= 8; row++) {
@@ -324,7 +183,7 @@ public class ChessGame {
         return false;
     }
 
-    private ChessPosition findKing(TeamColor teamColor, ChessBoard board) {
+    private ChessPosition findTheKing(TeamColor teamColor, ChessBoard board) {
         for (int row = 1; row <= 8; row++) {
             for (int col = 1; col <= 8; col++) {
                 ChessPosition kingPosition = new ChessPosition(row, col);
