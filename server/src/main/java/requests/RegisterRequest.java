@@ -1,12 +1,14 @@
-package request;
+package requests;
 
-public class LoginRequest {
+public class RegisterRequest {
     private String username;
     private String password;
+    private String email;
 
-    public LoginRequest(String username, String password) {
+    public RegisterRequest(String username, String password, String email) {
         this.username = username;
         this.password = password;
+        this.email = email;
     }
 
     public String getUsername() {
@@ -16,4 +18,9 @@ public class LoginRequest {
     public String getPassword() {
         return password;
     }
+
+    public String getEmail() {
+        return email;
+    }
 }
+

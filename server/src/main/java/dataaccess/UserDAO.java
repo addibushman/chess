@@ -2,17 +2,19 @@ package dataaccess;
 
 import model.User;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class UserDAO {
-    private static Map<String, User> users = new HashMap<>();
 
-    static {
-        users.put("testUser", new User("testUser", "testPass", "testUser@example.com"));
+    private final UserData userData = UserData.getInstance();
+
+    public void addUser(User user) {
+        userData.addUser(user);
     }
 
-    public User getUser(String username) {
-        return users.get(username);
+    public User getUserByUsername(String username) {
+        return userData.getUserByUsername(username);
+    }
+
+    public void clearUsers() {
+        userData.clearUserData();
     }
 }

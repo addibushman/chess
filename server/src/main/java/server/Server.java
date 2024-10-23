@@ -1,27 +1,26 @@
 package server;
 
-import com.sun.net.httpserver.HttpServer;
-
-import java.io.IOException;
-import java.net.InetSocketAddress;
+import spark.*;
 
 public class Server {
-    private HttpServer server;
 
-    public void run(int port) {
-        try {
-            server = HttpServer.create(new InetSocketAddress(port), 0);
-            server.createContext("/session", new LoginHandler()); // New login endpoint
-            server.start();
-            System.out.println("Server started on port " + port);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public int run(int desiredPort) {
+        Spark.port(desiredPort);
+
+        Spark.staticFiles.location("web");
+
+        // Register your endpoints and handle exceptions here.
+        Spark.post("/user", new RegisterHandler());
+
+        //This line initializes the server and can be removed once you have a functioning endpoint 
+        Spark.init();
+
+        Spark.awaitInitialization();
+        return Spark.port();
     }
 
     public void stop() {
-        if (server != null) {
-            server.stop(0);
-        }
+        Spark.stop();
+        Spark.awaitStop();
     }
 }
