@@ -1,25 +1,34 @@
 package server;
 
-import spark.*;
+import com.sun.net.httpserver.HttpServer;
+import java.io.IOException;
+import java.net.InetSocketAddress;
 
 public class Server {
+    private HttpServer httpServer;
 
-    public int run(int desiredPort) {
-        Spark.port(desiredPort);
+    public void run(int port) {
+        try {
+            // Create a new HTTP server on the specified port here
+            httpServer = HttpServer.create(new InetSocketAddress(port), 0);
 
-        Spark.staticFiles.location("web");
+            // Set up endpoints and handlers here
+            httpServer.createContext("/user", new UserHandler()); // Your custom handler for users
+            httpServer.createContext("/game", new GameHandler()); // Placeholder for game-related logic
 
-        // Register your endpoints and handle exceptions here.
+            // Start the server here
+            httpServer.start();
+            System.out.println("Server running on port " + port);
 
-        //This line initializes the server and can be removed once you have a functioning endpoint 
-        Spark.init();
-
-        Spark.awaitInitialization();
-        return Spark.port();
+        } catch (IOException e) {
+            System.out.println("Error starting the server: " + e.getMessage());
+        }
     }
 
     public void stop() {
-        Spark.stop();
-        Spark.awaitStop();
+        if (httpServer != null) {
+            httpServer.stop(0); // Stop the server gracefully
+            System.out.println("Server stopped");
+        }
     }
 }

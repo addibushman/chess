@@ -12,26 +12,35 @@ public class UserDAO {
         this.conn = conn;
     }
 
-    public void addUser(String username, String password) throws DataAccessException {
-        String sql = "INSERT INTO Users (username, password) VALUES(?,?);";
+    public UserDAO() {
+        this.conn = null;
+    }
+
+
+    public void addUser(String username, String password, String email) throws DataAccessException {
+        String sql = "INSERT INTO Users (username, password, email) VALUES(?,?,?);";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, username);
             stmt.setString(2, password);
+            stmt.setString(3, email); // Include email in the insertion
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new DataAccessException("Error inserting user into database");
         }
     }
 
-    public String findPasswordByUsername(String username) throws DataAccessException {
-        String password = null;
+    public User find(String username) throws DataAccessException {
+        User user = null;
         ResultSet rs = null;
-        String sql = "SELECT password FROM Users WHERE username = ?;";
+        String sql = "SELECT username, password, email FROM Users WHERE username = ?;";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, username);
             rs = stmt.executeQuery();
             if (rs.next()) {
-                password = rs.getString("password");
+                String testUsername = rs.getString("username");
+                String testPassword = rs.getString("password");
+                String testEmail = rs.getString("email");
+                user = new User(testUsername, testPassword, testEmail);
             }
         } catch (SQLException e) {
             throw new DataAccessException("Error finding user in the database");
@@ -44,7 +53,7 @@ public class UserDAO {
                 }
             }
         }
-        return password;
+        return user;
     }
 
     public void clearUsers() throws DataAccessException {
