@@ -22,9 +22,8 @@ public class RegisterHandler implements Route {
         if (result.isSuccess()) {
             res.status(200);
         } else {
-            res.status(400);
+            res.status(403);
         }
         return gson.toJson(result);
     }
 }
-

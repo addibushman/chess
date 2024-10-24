@@ -1,5 +1,6 @@
 package passoff.server;
 
+import dataaccess.UserDAO;
 import dataaccess.UserData;
 import model.User;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,7 +32,8 @@ public class RegisterServiceTest {
         assertEquals("newUser", result.getUsername());
         assertEquals("Registration successful!", result.getMessage());
 
-        User user = UserData.getInstance().getUserByUsername("newUser");
+
+        User user = new UserDAO().getUserByUsername("newUser");
         assertNotNull(user);
         assertEquals("newuser@mail.com", user.getEmail());
     }

@@ -8,8 +8,11 @@ import requests.RegisterRequest;
 import results.RegisterResult;
 
 import java.util.UUID;
+import java.util.logging.Logger;
 
 public class RegisterService {
+
+    private static final Logger logger = Logger.getLogger(RegisterService.class.getName());
 
     private final UserDAO userDAO = new UserDAO();
     private final AuthDAO authDAO = new AuthDAO();
@@ -20,8 +23,14 @@ public class RegisterService {
         // Check if user already exists
         User existingUser = userDAO.getUserByUsername(request.getUsername());
         if (existingUser != null) {
+            // Log that the user already exists
+            logger.info("User already exists: " + request.getUsername());
+
+            // User already exists, return forbidden response
             result.setSuccess(false);
-            result.setMessage("User already exists.");
+            result.setMessage("Forbidden: User already exists.");
+            result.setAuthToken(null); // Clear any auth token
+            result.setUsername(null); // Clear the username
             return result;
         }
 
@@ -39,6 +48,8 @@ public class RegisterService {
         result.setAuthToken(authToken);
         result.setUsername(newUser.getUsername());
         result.setMessage("Registration successful!");
+
+        logger.info("Registration successful for user: " + request.getUsername());
 
         return result;
     }
