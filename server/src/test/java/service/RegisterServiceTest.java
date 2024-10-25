@@ -57,14 +57,13 @@ public class RegisterServiceTest {
 
     @Test
     public void testRegisterUserAlreadyExists() {
-        // Arrange
         RegisterRequest request1 = new RegisterRequest("existingUser", "password123", "existing@mail.com");
-        registerService.register(request1); // First registration succeeds
+        registerService.register(request1);
 
         RegisterRequest request2 = new RegisterRequest("existingUser", "newpassword", "newemail@mail.com");
 
 
-        RegisterResult result = registerService.register(request2); // Attempt to register again
+        RegisterResult result = registerService.register(request2);
 
 
         assertFalse(result.isSuccess(), "Registration should fail for an existing user");
