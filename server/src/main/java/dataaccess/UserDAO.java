@@ -7,7 +7,7 @@ import model.User;
 
 
 public class UserDAO {
-    // In-memory storage for users
+
     private static HashMap<String, User> users = new HashMap<>();
 
     public void addUser(User user) {
@@ -19,10 +19,10 @@ public class UserDAO {
     }
 
     public List<User> getAllUsers() {
-        return new ArrayList<>(users.values()); // Return a list of all users
+        return new ArrayList<>(users.values());
     }
 
     public void clear() {
-        users.clear(); // Clear all users from the in-memory store
+        users.clear();
     }
 }

@@ -11,7 +11,6 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 public class RegisterService {
-
     private static final Logger logger = Logger.getLogger(RegisterService.class.getName());
 
     private final UserDAO userDAO = new UserDAO();
@@ -19,6 +18,16 @@ public class RegisterService {
 
     public RegisterResult register(RegisterRequest request) {
         RegisterResult result = new RegisterResult();
+
+        // Validate required fields
+        if (!isValidRequest(request)) {
+            logger.warning("Bad request: Missing required fields");
+            result.setSuccess(false);
+            result.setMessage("Error: Bad Request - Missing required fields");
+            result.setAuthToken(null);
+            result.setUsername(null);
+            return result;
+        }
 
         // Check if user already exists
         User existingUser = userDAO.getUserByUsername(request.getUsername());
@@ -28,9 +37,9 @@ public class RegisterService {
 
             // User already exists, return forbidden response
             result.setSuccess(false);
-            result.setMessage("Forbidden: User already exists.");
-            result.setAuthToken(null); // Clear any auth token
-            result.setUsername(null); // Clear the username
+            result.setMessage("Error: Forbidden - User already exists");
+            result.setAuthToken(null);
+            result.setUsername(null);
             return result;
         }
 
@@ -52,5 +61,12 @@ public class RegisterService {
         logger.info("Registration successful for user: " + request.getUsername());
 
         return result;
+    }
+
+    private boolean isValidRequest(RegisterRequest request) {
+        return request != null &&
+                request.getUsername() != null && !request.getUsername().trim().isEmpty() &&
+                request.getPassword() != null && !request.getPassword().trim().isEmpty() &&
+                request.getEmail() != null && !request.getEmail().trim().isEmpty();
     }
 }

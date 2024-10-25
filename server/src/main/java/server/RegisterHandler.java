@@ -19,11 +19,19 @@ public class RegisterHandler implements Route {
         RegisterResult result = registerService.register(registerRequest);
 
         res.type("application/json");
+
         if (result.isSuccess()) {
             res.status(200);
         } else {
-            res.status(403);
+            // Check the error message to determine the appropriate status code
+            if (result.getMessage() != null && result.getMessage().contains("Bad Request")) {
+                res.status(400);
+            } else {
+                // For "User already exists" and other forbidden cases
+                res.status(403);
+            }
         }
+
         return gson.toJson(result);
     }
 }

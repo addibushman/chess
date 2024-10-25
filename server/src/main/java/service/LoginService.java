@@ -28,7 +28,7 @@ public class LoginService {
             return new LoginResult(true, user.getUsername(), authToken, "Login successful");
         } else {
             // Return a failed login result
-            return new LoginResult(false, null, null, "Invalid username or password");
+            return new LoginResult(false, null, null, "Error Invalid username or password");
         }
     }
 }

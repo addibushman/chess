@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class AuthDAO {
-    // In-memory storage for auth tokens
+
     private static HashMap<String, AuthToken> authTokens = new HashMap<>();
 
     public void addAuthToken(AuthToken authToken) {
@@ -19,11 +19,11 @@ public class AuthDAO {
     }
 
     public List<AuthToken> getAllAuthTokens() {
-        return new ArrayList<>(authTokens.values()); // Return a list of all auth tokens
+        return new ArrayList<>(authTokens.values());
     }
 
     public void clear() {
-        authTokens.clear(); // Clear all auth tokens from the in-memory store
+        authTokens.clear();
     }
 }
 
