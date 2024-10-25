@@ -49,14 +49,14 @@ public class GameData {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {return true;}
+        if (o == null || getClass() != o.getClass()) {return false;}
 
         GameData gameData = (GameData) o;
 
-        if (!gameID.equals(gameData.gameID)) return false;
-        if (!gameName.equals(gameData.gameName)) return false;
-        if (!whiteUsername.equals(gameData.whiteUsername)) return false;
+        if (!gameID.equals(gameData.gameID)) {return false;}
+        if (!gameName.equals(gameData.gameName)) {return false;}
+        if (!whiteUsername.equals(gameData.whiteUsername)) {return false;}
         return blackUsername.equals(gameData.blackUsername);
     }
 

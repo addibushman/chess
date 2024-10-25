@@ -9,14 +9,14 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 public class RegisterService {
-    private static final Logger logger = Logger.getLogger(RegisterService.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(RegisterService.class.getName());
 
     public RegisterResult register(RegisterRequest request) {
         RegisterResult result = new RegisterResult();
 
         // Validate required fields
         if (!isValidRequest(request)) {
-            logger.warning("Bad request: Missing required fields");
+            LOGGER.warning("Bad request: Missing required fields");
             result.setSuccess(false);
             result.setMessage("Error: Bad Request - Missing required fields");
             result.setAuthToken(null);
@@ -28,7 +28,7 @@ public class RegisterService {
         User existingUser = DaoService.getInstance().getUserDAO().getUserByUsername(request.getUsername());
         if (existingUser != null) {
             // Log that the user already exists
-            logger.info("User already exists: " + request.getUsername());
+            LOGGER.info("User already exists: " + request.getUsername());
 
             // User already exists, return forbidden response
             result.setSuccess(false);
@@ -53,7 +53,7 @@ public class RegisterService {
         result.setUsername(newUser.getUsername());
         result.setMessage("Registration successful!");
 
-        logger.info("Registration successful for user: " + request.getUsername());
+        LOGGER.info("Registration successful for user: " + request.getUsername());
 
         return result;
     }

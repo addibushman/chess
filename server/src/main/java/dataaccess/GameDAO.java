@@ -23,15 +23,6 @@ public class GameDAO {
         }
     }
 
-    // Method to add a new game
-    public void addGame(GameData game) throws DataAccessException {
-        try {
-            games.add(game);
-        } catch (Exception e) {
-            throw new DataAccessException("Error adding game");
-        }
-    }
-
     // Method to create a new game
     public String createGame(GameData gameData) throws DataAccessException {
         try {

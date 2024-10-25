@@ -17,16 +17,8 @@ public class AuthData {
         return instance;
     }
 
-    public void addAuthToken(AuthToken authToken) {
-        authTokensTable.put(authToken.getToken(), authToken);
-    }
-
     public AuthToken getAuthToken(String token) {
         return authTokensTable.get(token);
-    }
-
-    public void clearAuthData() {
-        authTokensTable.clear();
     }
 }
 

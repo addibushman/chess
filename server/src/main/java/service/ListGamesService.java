@@ -34,17 +34,4 @@ public class ListGamesService {
         }
     }
 
-    private List<String> convertGameDataToStrings(List<GameData> games) {
-        if (games == null) {
-            return new ArrayList<>();
-        }
-
-        return games.stream()
-                .map(game -> String.format("Game ID: %s, Name: %s, White Player: %s, Black Player: %s",
-                        game.getGameID(),
-                        game.getGameName(),
-                        game.getWhiteUsername() != null ? game.getWhiteUsername() : "[EMPTY]",
-                        game.getBlackUsername() != null ? game.getBlackUsername() : "[EMPTY]"))
-                .collect(Collectors.toList());
-    }
 }

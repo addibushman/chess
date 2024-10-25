@@ -67,8 +67,8 @@ public class ChessPiece {
 //Java generates equals, hashcode, and toString for you, blessed day
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {return true;}
+        if (o == null || getClass() != o.getClass()) {return false;}
         ChessPiece that = (ChessPiece) o;
         return teamColor == that.teamColor && pieceType == that.pieceType;
     }
