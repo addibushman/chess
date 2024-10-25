@@ -23,11 +23,9 @@ public class RegisterHandler implements Route {
         if (result.isSuccess()) {
             res.status(200);
         } else {
-            // Check the error message to determine the appropriate status code
             if (result.getMessage() != null && result.getMessage().contains("Bad Request")) {
                 res.status(400);
             } else {
-                // For "User already exists" and other forbidden cases
                 res.status(403);
             }
         }

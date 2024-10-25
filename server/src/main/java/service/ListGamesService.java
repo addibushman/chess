@@ -21,11 +21,7 @@ public class ListGamesService {
                 return new ListGamesResult(false, "Error Invalid authToken", null);
             }
 
-            // Get the list of games from GameDAO
             List<GameData> games = DaoService.getInstance().getGameDAO().listGames();
-
-            // Convert GameData list to String list
-//            List<String> gameStrings = convertGameDataToStrings(games);
 
             return new ListGamesResult(true, "Games retrieved successfully", games);
 

@@ -33,7 +33,7 @@ public class ListGamesServiceTest {
         // Call the listGames service
         ListGamesResult result = listGamesService.listGames(request);
 
-        // Verify that the result indicates success
+
         assertTrue(result.isSuccess());
         assertEquals(0, result.getGames().size());
         assertEquals("Games retrieved successfully", result.getMessage());
@@ -41,13 +41,13 @@ public class ListGamesServiceTest {
 
     @Test
     public void testListGamesFailureInvalidToken() {
-        // Create a request with an invalid authToken
+
         ListGamesRequest request = new ListGamesRequest("invalidToken");
 
-        // Call the listGames service
+
         ListGamesResult result = listGamesService.listGames(request);
 
-        // Verify that the result indicates failure
+
         assertFalse(result.isSuccess());
         assertEquals("Error Invalid authToken", result.getMessage());
     }

@@ -2,25 +2,25 @@ package service;
 
 import dataaccess.AuthDAO;
 import dataaccess.UserDAO;
+import dataaccess.DataAccessException;
+import model.User;
+import model.AuthToken;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import results.ClearResult;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import model.User;
-import model.AuthToken;
+import org.junit.jupiter.api.Assertions;
 
 public class ClearServiceTest {
 
     private ClearService clearService;
+    private UserDAO userDAO;
+    private AuthDAO authDAO;
 
     @BeforeEach
-    public void setUp() throws dataaccess.DataAccessException {
+    public void setUp() throws DataAccessException {
         clearService = new ClearService();
-
-        UserDAO userDAO = new UserDAO();
-        AuthDAO authDAO = new AuthDAO();
+        userDAO = new UserDAO();
+        authDAO = new AuthDAO();
 
         userDAO.addUser(new User("testUser1", "password1", "email1@test.com"));
         userDAO.addUser(new User("testUser2", "password2", "email2@test.com"));
@@ -29,15 +29,29 @@ public class ClearServiceTest {
     }
 
     @Test
-    public void testClearSuccess() throws dataaccess.DataAccessException {
+    public void testClearSuccess() throws DataAccessException {
         ClearResult result = clearService.clear();
 
-        assertTrue(result.isSuccess());
-        assertEquals("Database cleared successfully!", result.getMessage());
 
-        UserDAO userDAO = new UserDAO();
-        AuthDAO authDAO = new AuthDAO();
-        assertEquals(0, userDAO.getAllUsers().size());
-        assertEquals(0, authDAO.getAllAuthTokens().size());
+        Assertions.assertTrue(result.isSuccess());
+        Assertions.assertEquals("Database cleared successfully!", result.getMessage());
+
+
+        Assertions.assertEquals(0, userDAO.getAllUsers().size());
+        Assertions.assertEquals(0, authDAO.getAllAuthTokens().size());
+    }
+
+    @Test
+    public void testClearFailure() throws DataAccessException {
+
+        userDAO.clear();
+        authDAO.clear();
+
+
+        ClearResult result = clearService.clear();
+
+
+        Assertions.assertTrue(result.isSuccess());
+        Assertions.assertEquals("Database cleared successfully!", result.getMessage());
     }
 }

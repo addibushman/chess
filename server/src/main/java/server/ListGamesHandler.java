@@ -14,13 +14,13 @@ public class ListGamesHandler implements Route {
     public Object handle(Request req, Response res) {
         Gson gson = new Gson();
 
-        // Extract authToken from the request header (assuming it's in the Authorization header)
+
         String authToken = req.headers("Authorization");
 
-        // Create a request object for the service layer
+
         ListGamesRequest listGamesRequest = new ListGamesRequest(authToken);
 
-        // Call the service layer
+
         ListGamesService listGamesService = new ListGamesService();
         ListGamesResult result = listGamesService.listGames(listGamesRequest);
 

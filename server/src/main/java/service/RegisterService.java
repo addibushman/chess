@@ -14,7 +14,6 @@ public class RegisterService {
     public RegisterResult register(RegisterRequest request) {
         RegisterResult result = new RegisterResult();
 
-        // Validate required fields
         if (!isValidRequest(request)) {
             LOGGER.warning("Bad request: Missing required fields");
             result.setSuccess(false);
@@ -24,13 +23,10 @@ public class RegisterService {
             return result;
         }
 
-        // Check if user already exists
         User existingUser = DaoService.getInstance().getUserDAO().getUserByUsername(request.getUsername());
         if (existingUser != null) {
-            // Log that the user already exists
             LOGGER.info("User already exists: " + request.getUsername());
 
-            // User already exists, return forbidden response
             result.setSuccess(false);
             result.setMessage("Error: Forbidden - User already exists");
             result.setAuthToken(null);
@@ -38,16 +34,13 @@ public class RegisterService {
             return result;
         }
 
-        // Register the new user
         User newUser = new User(request.getUsername(), request.getPassword(), request.getEmail());
         DaoService.getInstance().getUserDAO().addUser(newUser);
 
-        // Create AuthToken for the user
         String authToken = UUID.randomUUID().toString();
         AuthToken token = new AuthToken(authToken, newUser.getUsername());
         DaoService.getInstance().getAuthDAO().addAuthToken(token);
 
-        // Success
         result.setSuccess(true);
         result.setAuthToken(authToken);
         result.setUsername(newUser.getUsername());

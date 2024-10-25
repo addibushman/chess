@@ -16,13 +16,11 @@ public class JoinGameService {
                 return new JoinGameResult(false, "Error Invalid auth token");
             }
 
-            // Retrieve the game data
             GameData game = DaoService.getInstance().getGameDAO().getGame(request.getGameID());
             if (game == null) {
                 return new JoinGameResult(false, "Game not found");
             }
 
-            // Handle player color assignment
             String playerColor = request.getPlayerColor();
             if ("WHITE".equalsIgnoreCase(playerColor) && game.getWhiteUsername() == null) {
                 game.setWhiteUsername(authToken.getUsername());
@@ -36,7 +34,6 @@ public class JoinGameService {
                 return new JoinGameResult(false, "Error Invalid");
             }
 
-            // Update the game data in the DAO
             DaoService.getInstance().getGameDAO().updateGame(game);
 
             return new JoinGameResult(true, "Successfully joined the game");
