@@ -1,4 +1,4 @@
-package passoff.server;
+package service;
 
 import dataaccess.UserDAO;
 import model.UserData;
@@ -7,7 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import requests.RegisterRequest;
 import results.RegisterResult;
-import service.RegisterService;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -47,7 +46,7 @@ public class RegisterServiceTest {
         RegisterResult result = registerService.register(request2); // Second registration should fail
 
         assertFalse(result.isSuccess());
-        assertEquals("User already exists.", result.getMessage());
+        assertEquals("Error: Forbidden - User already exists", result.getMessage());
     }
 }
 

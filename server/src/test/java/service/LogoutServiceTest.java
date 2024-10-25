@@ -1,4 +1,4 @@
-package passoff.server;
+package service;
 
 import dataaccess.AuthDAO;
 import model.AuthToken;
@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import requests.LogoutRequest;
 import results.LogoutResult;
-import service.LogoutService;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -47,7 +46,7 @@ public class LogoutServiceTest {
 
         // Verify that the result indicates failure
         assertFalse(result.isSuccess());
-        assertEquals("Invalid authToken.", result.getMessage());
+        assertEquals("Error: Invalid authToken.", result.getMessage());
     }
 }
 

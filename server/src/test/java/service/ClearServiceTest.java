@@ -1,4 +1,4 @@
-package passoff.server;
+package service;
 
 import dataaccess.AuthDAO;
 import dataaccess.UserDAO;
@@ -8,7 +8,6 @@ import results.ClearResult;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import service.ClearService;
 import model.User;
 import model.AuthToken;
 

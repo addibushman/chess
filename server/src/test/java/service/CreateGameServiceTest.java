@@ -1,4 +1,4 @@
-package passoff.server;
+package service;
 
 import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
@@ -7,7 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import requests.CreateGameRequest;
 import results.CreateGameResult;
-import service.CreateGameService;
 
 import static org.junit.jupiter.api.Assertions.*;
 

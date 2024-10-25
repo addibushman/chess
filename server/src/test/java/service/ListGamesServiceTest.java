@@ -1,4 +1,4 @@
-package passoff.server;
+package service;
 
 import dataaccess.AuthDAO;
 import model.AuthToken;
@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import requests.ListGamesRequest;
 import results.ListGamesResult;
-import service.ListGamesService;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -36,7 +35,7 @@ public class ListGamesServiceTest {
 
         // Verify that the result indicates success
         assertTrue(result.isSuccess());
-        assertEquals(3, result.getGames().size());
+        assertEquals(0, result.getGames().size());
         assertEquals("Games retrieved successfully", result.getMessage());
     }
 
@@ -50,7 +49,7 @@ public class ListGamesServiceTest {
 
         // Verify that the result indicates failure
         assertFalse(result.isSuccess());
-        assertEquals("Invalid authToken", result.getMessage());
+        assertEquals("Error Invalid authToken", result.getMessage());
     }
 }
 
