@@ -1,7 +1,7 @@
 package passoff.server;
 
 import dataaccess.UserDAO;
-import dataaccess.UserData;
+import model.UserData;
 import model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

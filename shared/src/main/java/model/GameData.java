@@ -1,17 +1,17 @@
-package dataaccess;
+package model;
 
 public class GameData {
     private String gameID;
     private String gameName;
-    private String whitePlayer;
-    private String blackPlayer;
+    private String whiteUsername;
+    private String blackUsername;
 
     // Constructor
-    public GameData(String gameID, String gameName, String whitePlayer, String blackPlayer) {
+    public GameData(String gameID, String gameName, String whiteUsername, String blackUsername) {
         this.gameID = gameID;
         this.gameName = gameName;
-        this.whitePlayer = whitePlayer;
-        this.blackPlayer = blackPlayer;
+        this.whiteUsername = whiteUsername;
+        this.blackUsername = blackUsername;
     }
 
     // Getters and setters
@@ -31,20 +31,20 @@ public class GameData {
         this.gameName = gameName;
     }
 
-    public String getWhitePlayer() {
-        return whitePlayer;
+    public String getWhiteUsername() {
+        return whiteUsername;
     }
 
-    public void setWhitePlayer(String whitePlayer) {
-        this.whitePlayer = whitePlayer;
+    public void setWhiteUsername(String whiteUsername) {
+        this.whiteUsername = whiteUsername;
     }
 
-    public String getBlackPlayer() {
-        return blackPlayer;
+    public String getBlackUsername() {
+        return blackUsername;
     }
 
-    public void setBlackPlayer(String blackPlayer) {
-        this.blackPlayer = blackPlayer;
+    public void setBlackUsername(String blackUsername) {
+        this.blackUsername = blackUsername;
     }
 
     @Override
@@ -56,16 +56,16 @@ public class GameData {
 
         if (!gameID.equals(gameData.gameID)) return false;
         if (!gameName.equals(gameData.gameName)) return false;
-        if (!whitePlayer.equals(gameData.whitePlayer)) return false;
-        return blackPlayer.equals(gameData.blackPlayer);
+        if (!whiteUsername.equals(gameData.whiteUsername)) return false;
+        return blackUsername.equals(gameData.blackUsername);
     }
 
     @Override
     public int hashCode() {
         int result = gameID.hashCode();
         result = 31 * result + gameName.hashCode();
-        result = 31 * result + whitePlayer.hashCode();
-        result = 31 * result + blackPlayer.hashCode();
+        result = 31 * result + whiteUsername.hashCode();
+        result = 31 * result + blackUsername.hashCode();
         return result;
     }
 }

@@ -1,6 +1,4 @@
-package dataaccess;
-
-import model.User;
+package model;
 
 import java.util.HashMap;
 import java.util.Map;

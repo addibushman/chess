@@ -1,6 +1,4 @@
-package dataaccess;
-
-import model.AuthToken;
+package model;
 
 import java.util.HashMap;
 import java.util.Map;

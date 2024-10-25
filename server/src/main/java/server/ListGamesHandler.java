@@ -27,6 +27,8 @@ public class ListGamesHandler implements Route {
         res.type("application/json");
         if (result.isSuccess()) {
             res.status(200);
+        } else if (result.getMessage().contains("Invalid authToken")) {
+            res.status(401);
         } else {
             res.status(403);
         }

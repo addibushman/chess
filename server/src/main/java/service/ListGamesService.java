@@ -1,9 +1,7 @@
 package service;
 
-import dataaccess.AuthDAO;
-import dataaccess.GameDAO;
 import dataaccess.DataAccessException;
-import dataaccess.GameData;
+import model.GameData;
 import model.AuthToken;
 import requests.ListGamesRequest;
 import results.ListGamesResult;
@@ -17,21 +15,19 @@ public class ListGamesService {
     public ListGamesResult listGames(ListGamesRequest request) {
         try {
             // Validate the auth token
-            AuthDAO authDAO = new AuthDAO();
-            AuthToken authToken = authDAO.getAuthToken(request.getAuthToken());
+            AuthToken authToken = DaoService.getInstance().getAuthDAO().getAuthToken(request.getAuthToken());
 
             if (authToken == null) {
-                return new ListGamesResult(false, "Invalid authToken", null);
+                return new ListGamesResult(false, "Error Invalid authToken", null);
             }
 
             // Get the list of games from GameDAO
-            GameDAO gameDAO = new GameDAO();
-            List<GameData> games = gameDAO.listGames();
+            List<GameData> games = DaoService.getInstance().getGameDAO().listGames();
 
             // Convert GameData list to String list
-            List<String> gameStrings = convertGameDataToStrings(games);
+//            List<String> gameStrings = convertGameDataToStrings(games);
 
-            return new ListGamesResult(true, "Games retrieved successfully", gameStrings);
+            return new ListGamesResult(true, "Games retrieved successfully", games);
 
         } catch (DataAccessException e) {
             return new ListGamesResult(false, "Error accessing the database", null);
@@ -47,8 +43,8 @@ public class ListGamesService {
                 .map(game -> String.format("Game ID: %s, Name: %s, White Player: %s, Black Player: %s",
                         game.getGameID(),
                         game.getGameName(),
-                        game.getWhitePlayer() != null ? game.getWhitePlayer() : "[EMPTY]",
-                        game.getBlackPlayer() != null ? game.getBlackPlayer() : "[EMPTY]"))
+                        game.getWhiteUsername() != null ? game.getWhiteUsername() : "[EMPTY]",
+                        game.getBlackUsername() != null ? game.getBlackUsername() : "[EMPTY]"))
                 .collect(Collectors.toList());
     }
 }

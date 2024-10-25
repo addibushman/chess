@@ -8,7 +8,6 @@ import results.ClearResult;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import server.ClearHandler;
 import service.ClearService;
 import model.User;
 import model.AuthToken;

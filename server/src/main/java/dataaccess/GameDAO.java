@@ -1,6 +1,6 @@
 package dataaccess;
 
-import dataaccess.GameData;
+import model.GameData;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,13 +47,33 @@ public class GameDAO {
     }
 
     // Clear all games (for clear service)
-    public void clearGames() throws DataAccessException {
+    public void clear() throws DataAccessException {
         try {
             games.clear();
             nextGameID = 1; // Reset game ID counter
         } catch (Exception e) {
             throw new DataAccessException("Error clearing games");
         }
+    }
+    // Retrieve a game by gameID
+    public GameData getGame(String gameID) throws DataAccessException {
+        for (GameData game : games) {
+            if (game.getGameID().equals(gameID)) {
+                return game;
+            }
+        }
+        throw new DataAccessException("Game not found");
+    }
+
+    // Update game data
+    public void updateGame(GameData updatedGame) throws DataAccessException {
+        for (int i = 0; i < games.size(); i++) {
+            if (games.get(i).getGameID().equals(updatedGame.getGameID())) {
+                games.set(i, updatedGame);
+                return;
+            }
+        }
+        throw new DataAccessException("Error updating game");
     }
 }
 

@@ -1,7 +1,6 @@
 package passoff.server;
 
 import dataaccess.AuthDAO;
-import dataaccess.GameDAO;
 import dataaccess.DataAccessException;
 import model.AuthToken;
 import org.junit.jupiter.api.BeforeEach;
