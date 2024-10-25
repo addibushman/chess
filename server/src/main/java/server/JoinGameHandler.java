@@ -30,7 +30,7 @@ public class JoinGameHandler implements Route {
             res.status(200); // Success
         }
         else if (result.getMessage().contains("Invalid auth token")) {
-            res.status(401); // Bad request
+            res.status(401); // Invalid Request
         }
         else if (result.getMessage().contains("Error Color already taken")) {
             res.status(403); // Forbidden
