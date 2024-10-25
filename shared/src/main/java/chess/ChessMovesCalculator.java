@@ -34,7 +34,6 @@ public class ChessMovesCalculator {
         }
     }
 
-
     private static Collection<ChessMove> calculateMovesInDirections(ChessBoard board, ChessPosition position,
                                                                     ChessPiece piece, int[][] directions, int maxSteps) {
         Collection<ChessMove> moves = new ArrayList<>();
@@ -46,7 +45,9 @@ public class ChessMovesCalculator {
             while (steps < maxSteps) {
                 row += dir[0];
                 col += dir[1];
-                if (!isOnBoard(row, col)) break;
+                if (!isOnBoard(row, col)) {
+                    break;
+                }
 
                 ChessPosition newPos = new ChessPosition(row, col);
                 ChessPiece targetPiece = board.getPiece(newPos);
@@ -70,11 +71,9 @@ public class ChessMovesCalculator {
         int row = position.getRow();
         int col = position.getColumn();
 
-
         ChessPosition oneStepForward = new ChessPosition(row + direction, col);
         if (isOnBoard(oneStepForward.getRow(), oneStepForward.getColumn()) && board.getPiece(oneStepForward) == null) {
             handlePawnPromotion(moves, position, oneStepForward, piece);
-
 
             if ((piece.getTeamColor() == ChessGame.TeamColor.WHITE && row == 2) ||
                     (piece.getTeamColor() == ChessGame.TeamColor.BLACK && row == 7)) {
@@ -84,7 +83,6 @@ public class ChessMovesCalculator {
                 }
             }
         }
-
 
         int[][] diagonals = {{direction, 1}, {direction, -1}};
         for (int[] diag : diagonals) {
@@ -101,12 +99,10 @@ public class ChessMovesCalculator {
         return moves;
     }
 
-
     private static void handlePawnPromotion(Collection<ChessMove> moves, ChessPosition startPos, ChessPosition endPos, ChessPiece piece) {
         int endRow = endPos.getRow();
         if ((piece.getTeamColor() == ChessGame.TeamColor.WHITE && endRow == 8) ||
                 (piece.getTeamColor() == ChessGame.TeamColor.BLACK && endRow == 1)) {
-
             moves.add(new ChessMove(startPos, endPos, ChessPiece.PieceType.QUEEN));
             moves.add(new ChessMove(startPos, endPos, ChessPiece.PieceType.ROOK));
             moves.add(new ChessMove(startPos, endPos, ChessPiece.PieceType.BISHOP));
@@ -115,7 +111,6 @@ public class ChessMovesCalculator {
             moves.add(new ChessMove(startPos, endPos, null));
         }
     }
-
 
     private static boolean isOnBoard(int row, int col) {
         return row >= 1 && row <= 8 && col >= 1 && col <= 8;
