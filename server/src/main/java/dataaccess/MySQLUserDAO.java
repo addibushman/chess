@@ -19,7 +19,7 @@ public class MySQLUserDAO {
             stmt.executeUpdate();
 
         } catch (SQLException e) {
-            throw new DataAccessException("Error adding user to the database: " + e.getMessage());
+            throw new DataAccessException("Error adding user to the database: ");
         }
     }
 
@@ -41,7 +41,16 @@ public class MySQLUserDAO {
             return null;
 
         } catch (SQLException e) {
-            throw new DataAccessException("Error retrieving user from the database: " + e.getMessage());
+            throw new DataAccessException("Error retrieving user from the database: ");
+        }
+    }
+    public void clear() throws DataAccessException {
+        String sql = "DELETE FROM USERS";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new DataAccessException("Error clearing users table");
         }
     }
 }

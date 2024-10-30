@@ -10,13 +10,12 @@ public class JoinGameService {
 
     public JoinGameResult joinGame(JoinGameRequest request) {
         try {
-            // Validate the auth token
             AuthToken authToken = DaoService.getInstance().getAuthDAO().getAuthToken(request.getAuthToken());
             if (authToken == null) {
                 return new JoinGameResult(false, "Error Invalid auth token");
             }
 
-            GameData game = DaoService.getInstance().getGameDAO().getGame(request.getGameID());
+            GameData game = DaoService.getInstance().getGameDAO().getGameByID(request.getGameID());
             if (game == null) {
                 return new JoinGameResult(false, "Game not found");
             }
