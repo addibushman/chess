@@ -40,13 +40,17 @@ public class MySQLGameDAOTest {
         GameData game2 = new GameData(null, "DuplicateGame", "whitePlayer2", "blackPlayer2");
         assertDoesNotThrow(() -> gameDAO.createGame(game2));
 
-        // Validate that the second game was added despite having the same name
+        // Retrieve both games by name to confirm they both exist, regardless of ID
         assertDoesNotThrow(() -> {
-            GameData retrievedGame = gameDAO.getGameByID("2"); // Adjust as needed
-            assertNotNull(retrievedGame);
-            assertEquals("DuplicateGame", retrievedGame.getGameName());
+            // Check if at least two games with the name "DuplicateGame" exist
+            var gamesList = gameDAO.listGames(); // Fetch all games and filter by name
+            long duplicateCount = gamesList.stream()
+                    .filter(g -> "DuplicateGame".equals(g.getGameName()))
+                    .count();
+            assertTrue(duplicateCount >= 2, "There should be at least two games with the name 'DuplicateGame'");
         });
     }
+
 
     @Test
     public void testGetNonExistentGame() {
