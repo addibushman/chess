@@ -95,20 +95,4 @@ public class DatabaseManager {
             preparedStatement.executeUpdate();
         }
     }
-    public static void clearAllData() throws DataAccessException {
-        try (Connection conn = getConnection()) {
-            String[] clearStatements = {
-                    "DELETE FROM auth_tokens",
-                    "DELETE FROM games",
-                    "DELETE FROM users"
-            };
-            for (String sql : clearStatements) {
-                try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                    stmt.executeUpdate();
-                }
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException("Error clearing database tables: " + e.getMessage());
-        }
-    }
 }

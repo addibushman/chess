@@ -35,7 +35,7 @@ public class Server {
             // Create the database and tables if they don't exist
             DatabaseManager.createDatabase();
             //need to clear all data
-            DatabaseManager.clearAllData();
+            //DatabaseManager.clearAllData();
         } catch (DataAccessException e) {
             System.err.println("Failed to initialize the database: " + e.getMessage());
             System.exit(1); // Exit if the database fails to initialize
