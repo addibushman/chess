@@ -3,8 +3,10 @@ package service;
 import dataaccess.DataAccessException;
 import model.AuthToken;
 import model.User;
+import org.mindrot.jbcrypt.BCrypt;
 import requests.RegisterRequest;
 import results.RegisterResult;
+
 
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -36,7 +38,9 @@ public class RegisterService {
                 return result;
             }
 
-            User newUser = new User(request.getUsername(), request.getPassword(), request.getEmail());
+            // Hash password before storing it
+            String hashedPassword = BCrypt.hashpw(request.getPassword(), BCrypt.gensalt());
+            User newUser = new User(request.getUsername(), hashedPassword, request.getEmail());
             DaoService.getInstance().getUserDAO().addUser(newUser);
 
             String authToken = UUID.randomUUID().toString();
@@ -68,4 +72,3 @@ public class RegisterService {
                 request.getEmail() != null && !request.getEmail().trim().isEmpty();
     }
 }
-

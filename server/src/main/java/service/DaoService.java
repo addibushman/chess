@@ -1,11 +1,11 @@
 package service;
 
-import dataaccess.AuthDAO;
-import dataaccess.GameDAO;
-import dataaccess.UserDAO;
+import dataaccess.MySQLAuthTokenDAO;
+import dataaccess.MySQLGameDAO;
+import dataaccess.MySQLUserDAO;
+import dataaccess.DataAccessException;
 
 public class DaoService {
-
     private static DaoService daoService = null;
 
     public static DaoService getInstance() {
@@ -15,21 +15,28 @@ public class DaoService {
         return daoService;
     }
 
-    private final AuthDAO authDAO = new AuthDAO();
-    private final GameDAO gameDAO = new GameDAO();
-    private final UserDAO userDAO = new UserDAO();
+    private final MySQLAuthTokenDAO authDAO = new MySQLAuthTokenDAO();
+    private final MySQLGameDAO gameDAO = new MySQLGameDAO();
+    private final MySQLUserDAO userDAO = new MySQLUserDAO();
 
-    public AuthDAO getAuthDAO() {
+    public MySQLAuthTokenDAO getAuthDAO() {
         return authDAO;
     }
 
-    public GameDAO getGameDAO() {
+    public MySQLGameDAO getGameDAO() {
         return gameDAO;
     }
 
-    public UserDAO getUserDAO() {
+    public MySQLUserDAO getUserDAO() {
         return userDAO;
     }
+    public void clear() throws DataAccessException {
+        try {
+            userDAO.clear();
+            authDAO.clear();
+            gameDAO.clear();
+        } catch (DataAccessException e) {
+            throw new DataAccessException("Error clearing the database");
+        }
+    }
 }
-
-

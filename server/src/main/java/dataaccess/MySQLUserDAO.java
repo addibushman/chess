@@ -1,9 +1,12 @@
 package dataaccess;
 
+import model.GameData;
 import model.User;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MySQLUserDAO {
 
@@ -12,9 +15,9 @@ public class MySQLUserDAO {
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            String hashedPassword = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt());
+//            String hashedPassword = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt());
             stmt.setString(1, user.getUsername());
-            stmt.setString(2, hashedPassword);
+            stmt.setString(2, user.getPassword());
             stmt.setString(3, user.getEmail());
             stmt.executeUpdate();
 
@@ -45,12 +48,34 @@ public class MySQLUserDAO {
         }
     }
     public void clear() throws DataAccessException {
-        String sql = "DELETE FROM USERS";
+        String sql = "DELETE FROM users";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new DataAccessException("Error clearing users table");
+        }
+    }
+    public List<User> getAllUsers() throws DataAccessException{
+        String sql = "SELECT * FROM users;";
+        List<User> users = new ArrayList<>();
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                User user = new User(
+                        rs.getString("username"),
+                        rs.getString("password"),
+                        rs.getString("email")
+                );
+                users.add(user);
+            }
+            return users;
+
+        } catch (SQLException e) {
+            throw new DataAccessException("Error listing users from the database: " + e.getMessage());
         }
     }
 }

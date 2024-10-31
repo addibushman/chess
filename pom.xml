@@ -33,4 +33,17 @@
             <version>5.9.2</version>
         </dependency>
     </dependencies>
+    <dependency>
+        <groupId>mysql</groupId>
+        <artifactId>mysql-connector-java</artifactId>
+        <version>8.0.30</version>
+        <scope>compile</scope>
+    </dependency>
+    //added in this part for phase 4
+    <dependency>
+        <groupId>org.mindrot</groupId>
+        <artifactId>jbcrypt</artifactId>
+        <version>0.4</version>
+        <scope>compile</scope>
+    </dependency>
 </project>

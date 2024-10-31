@@ -17,7 +17,7 @@ public class JoinGameService {
 
             GameData game = DaoService.getInstance().getGameDAO().getGameByID(request.getGameID());
             if (game == null) {
-                return new JoinGameResult(false, "Game not found");
+                return new JoinGameResult(false, "Error Game not found");
             }
 
             String playerColor = request.getPlayerColor();

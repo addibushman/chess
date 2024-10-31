@@ -1,6 +1,9 @@
 package server;
 
 import spark.*;
+import dataaccess.DataAccessException;
+import dataaccess.DatabaseManager;
+
 
 public class Server {
 
@@ -20,8 +23,23 @@ public class Server {
 
         Spark.init();
 
+        initializeDatabase();
+
         Spark.awaitInitialization();
         return Spark.port();
+    }
+
+
+    private void initializeDatabase() {
+        try {
+            // Create the database and tables if they don't exist
+            DatabaseManager.createDatabase();
+            //need to clear all data
+            DatabaseManager.clearAllData();
+        } catch (DataAccessException e) {
+            System.err.println("Failed to initialize the database: " + e.getMessage());
+            System.exit(1); // Exit if the database fails to initialize
+        }
     }
 
     public void stop() {

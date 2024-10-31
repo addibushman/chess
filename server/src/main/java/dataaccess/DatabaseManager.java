@@ -9,9 +9,6 @@ public class DatabaseManager {
     private static final String PASSWORD;
     private static final String CONNECTION_URL;
 
-    /*
-     * Load the database information for the db.properties file.
-     */
     static {
         try {
             try (var propStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("db.properties")) {
@@ -29,44 +26,89 @@ public class DatabaseManager {
                 CONNECTION_URL = String.format("jdbc:mysql://%s:%d", host, port);
             }
         } catch (Exception ex) {
-            throw new RuntimeException("unable to process db.properties. " + ex.getMessage());
+            throw new RuntimeException("Unable to process db.properties. " + ex.getMessage());
         }
     }
 
-    /**
-     * Creates the database if it does not already exist.
-     */
-    static void createDatabase() throws DataAccessException {
-        try {
-            var statement = "CREATE DATABASE IF NOT EXISTS " + DATABASE_NAME;
-            var conn = DriverManager.getConnection(CONNECTION_URL, USER, PASSWORD);
-            try (var preparedStatement = conn.prepareStatement(statement)) {
-                preparedStatement.executeUpdate();
+    public static void createDatabase() throws DataAccessException {
+        try (var conn = DriverManager.getConnection(CONNECTION_URL, USER, PASSWORD)) {
+            String createDbStatement = "CREATE DATABASE IF NOT EXISTS " + DATABASE_NAME;
+            try (var stmt = conn.createStatement()) {
+                stmt.executeUpdate(createDbStatement);
             }
+
+            conn.setCatalog(DATABASE_NAME);
+            createTables(conn);
+
         } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage());
+            throw new DataAccessException("Error creating database: " + e.getMessage());
         }
     }
 
-    /**
-     * Create a connection to the database and sets the catalog based upon the
-     * properties specified in db.properties. Connections to the database should
-     * be short-lived, and you must close the connection when you are done with it.
-     * The easiest way to do that is with a try-with-resource block.
-     * <br/>
-     * <code>
-     * try (var conn = DbInfo.getConnection(databaseName)) {
-     * // execute SQL statements.
-     * }
-     * </code>
-     */
     static Connection getConnection() throws DataAccessException {
         try {
+            createDatabase();
             var conn = DriverManager.getConnection(CONNECTION_URL, USER, PASSWORD);
             conn.setCatalog(DATABASE_NAME);
             return conn;
         } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage());
+            throw new DataAccessException("Error connecting to database: " + e.getMessage());
+        }
+    }
+
+    private static void createTables(Connection conn) throws SQLException {
+        String createUsersTable = """
+            CREATE TABLE IF NOT EXISTS users (
+               username VARCHAR(50) PRIMARY KEY NOT NULL,
+               hashed_password VARCHAR(100) NOT NULL,
+               email VARCHAR(100),
+               created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        """;
+        executePreparedStatement(conn, createUsersTable);
+
+        String createGamesTable = """
+            CREATE TABLE IF NOT EXISTS games (
+               game_id INT AUTO_INCREMENT PRIMARY KEY,
+               game_name VARCHAR(100) NOT NULL,
+               white_player_id VARCHAR(256),
+               black_player_id VARCHAR(256),
+               game_state JSON,
+               created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        """;
+        executePreparedStatement(conn, createGamesTable);
+
+        String createAuthTokensTable = """
+            CREATE TABLE IF NOT EXISTS auth_tokens (
+                auth_token_id INT AUTO_INCREMENT PRIMARY KEY,
+                auth_token VARCHAR(100) NOT NULL UNIQUE,
+                username VARCHAR(50),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
+        """;
+        executePreparedStatement(conn, createAuthTokensTable);
+    }
+
+    private static void executePreparedStatement(Connection conn, String sql) throws SQLException {
+        try (PreparedStatement preparedStatement = conn.prepareStatement(sql)) {
+            preparedStatement.executeUpdate();
+        }
+    }
+    public static void clearAllData() throws DataAccessException {
+        try (Connection conn = getConnection()) {
+            String[] clearStatements = {
+                    "DELETE FROM auth_tokens",
+                    "DELETE FROM games",
+                    "DELETE FROM users"
+            };
+            for (String sql : clearStatements) {
+                try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                    stmt.executeUpdate();
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Error clearing database tables: " + e.getMessage());
         }
     }
 }

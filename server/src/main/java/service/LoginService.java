@@ -3,6 +3,7 @@ package service;
 import dataaccess.DataAccessException;
 import model.AuthToken;
 import model.User;
+import org.mindrot.jbcrypt.BCrypt;
 import requests.LoginRequest;
 import results.LoginResult;
 
@@ -14,7 +15,8 @@ public class LoginService {
         try {
             User user = DaoService.getInstance().getUserDAO().getUserByUsername(request.getUsername());
 
-            if (user != null && user.getPassword().equals(request.getPassword())) {
+            // Check if user exists and password matches the stored hash
+            if (user != null && BCrypt.checkpw(request.getPassword(), user.getPassword())) {
                 String authToken = UUID.randomUUID().toString();
                 AuthToken token = new AuthToken(authToken, user.getUsername());
                 DaoService.getInstance().getAuthDAO().addAuthToken(token);
@@ -29,4 +31,3 @@ public class LoginService {
         }
     }
 }
-
