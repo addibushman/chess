@@ -11,7 +11,7 @@ import java.util.List;
 public class MySQLAuthTokenDAO {
 
     public void addAuthToken(AuthToken token) throws DataAccessException {
-        String sql = "INSERT INTO AUTH_TOKENS (auth_token, username) VALUES (?, ?);";
+        String sql = "INSERT INTO auth_tokens (auth_token, username) VALUES (?, ?);";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -25,7 +25,7 @@ public class MySQLAuthTokenDAO {
     }
 
     public AuthToken getAuthToken(String authToken) throws DataAccessException {
-        String sql = "SELECT * FROM AUTH_TOKENS WHERE auth_token = ?;";
+        String sql = "SELECT * FROM auth_tokens WHERE auth_token = ?;";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -46,7 +46,7 @@ public class MySQLAuthTokenDAO {
     }
 
     public void deleteAuthToken(String authToken) throws DataAccessException {
-        String sql = "DELETE FROM AUTH_TOKENS WHERE auth_token = ?;";
+        String sql = "DELETE FROM auth_tokens WHERE auth_token = ?;";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 

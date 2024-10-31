@@ -11,7 +11,7 @@ import java.util.List;
 public class MySQLUserDAO {
 
     public void addUser(User user) throws DataAccessException {
-        String sql = "INSERT INTO USERS (username, hashed_password, email) VALUES (?, ?, ?);";
+        String sql = "INSERT INTO users (username, hashed_password, email) VALUES (?, ?, ?);";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -27,7 +27,7 @@ public class MySQLUserDAO {
     }
 
     public User getUserByUsername(String username) throws DataAccessException {
-        String sql = "SELECT * FROM USERS WHERE username = ?;";
+        String sql = "SELECT * FROM users WHERE username = ?;";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 

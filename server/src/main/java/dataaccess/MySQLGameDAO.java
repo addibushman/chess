@@ -8,7 +8,7 @@ import java.util.List;
 public class MySQLGameDAO {
 
     public void addGame(GameData game) throws DataAccessException {
-        String sql = "INSERT INTO GAMES (game_id, game_name, white_player_id, black_player_id) VALUES (?, ?, ?, ?);";
+        String sql = "INSERT INTO games (game_id, game_name, white_player_id, black_player_id) VALUES (?, ?, ?, ?);";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -51,7 +51,7 @@ public class MySQLGameDAO {
     }
 
     public GameData getGameByID(String gameID) throws DataAccessException {
-        String sql = "SELECT * FROM GAMES WHERE game_id = ?;";
+        String sql = "SELECT * FROM games WHERE game_id = ?;";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -74,7 +74,7 @@ public class MySQLGameDAO {
     }
 
     public List<GameData> listGames() throws DataAccessException {
-        String sql = "SELECT * FROM GAMES;";
+        String sql = "SELECT * FROM games;";
         List<GameData> games = new ArrayList<>();
 
         try (Connection conn = DatabaseManager.getConnection();
