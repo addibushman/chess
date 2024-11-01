@@ -16,11 +16,9 @@ public class MySQLGameDAOTest {
 
     @Test
     public void testAddGameSuccess() {
-        // Positive case: Adding a game successfully
         GameData game = new GameData(null, "Game 1", "whitePlayer1", "blackPlayer1");
         assertDoesNotThrow(() -> gameDAO.createGame(game));
 
-        // Retrieve the game by name to verify it was added
         assertDoesNotThrow(() -> {
             GameData retrievedGame = gameDAO.getGameByName("Game 1");
             assertNotNull(retrievedGame, "Game should have been added");
@@ -32,15 +30,12 @@ public class MySQLGameDAOTest {
 
     @Test
     public void testAddDuplicateGameName() {
-        // Add the first game
         GameData game1 = new GameData(null, "DuplicateGame", "whitePlayer1", "blackPlayer1");
         assertDoesNotThrow(() -> gameDAO.createGame(game1));
 
-        // Add a second game with the same name, which should not throw an exception
         GameData game2 = new GameData(null, "DuplicateGame", "whitePlayer2", "blackPlayer2");
         assertDoesNotThrow(() -> gameDAO.createGame(game2));
 
-        // Verify both games with the name "DuplicateGame" exist
         assertDoesNotThrow(() -> {
             var gamesList = gameDAO.listGames();
             long duplicateCount = gamesList.stream()
@@ -74,7 +69,6 @@ public class MySQLGameDAOTest {
 
     @Test
     public void testListGamesSuccess() {
-        // Positive case: Verify games can be listed after adding them
         GameData game1 = new GameData(null, "ListGame1", "whitePlayer1", "blackPlayer1");
         GameData game2 = new GameData(null, "ListGame2", "whitePlayer2", "blackPlayer2");
         assertDoesNotThrow(() -> {

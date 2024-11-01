@@ -38,7 +38,7 @@ public class RegisterService {
                 return result;
             }
 
-            // Hash password before storing it
+
             String hashedPassword = BCrypt.hashpw(request.getPassword(), BCrypt.gensalt());
             User newUser = new User(request.getUsername(), hashedPassword, request.getEmail());
             DaoService.getInstance().getUserDAO().addUser(newUser);

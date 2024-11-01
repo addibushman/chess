@@ -14,14 +14,11 @@ public class JoinGameHandler implements Route {
     public Object handle(Request req, Response res) {
         Gson gson = new Gson();
 
-        // Parse the incoming JSON request
         JoinGameRequest joinGameRequest = gson.fromJson(req.body(), JoinGameRequest.class);
 
-        // Set the auth token from the request headers
         String authToken = req.headers("Authorization");
         joinGameRequest.setAuthToken(authToken);
 
-        // Call the JoinGameService
         JoinGameService joinGameService = new JoinGameService();
         JoinGameResult result = joinGameService.joinGame(joinGameRequest);
 

@@ -1,7 +1,6 @@
 package dataaccess;
 
 import model.AuthToken;
-import model.User;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -77,7 +76,7 @@ public class MySQLAuthTokenDAO {
 
             while (rs.next()) {
                 AuthToken token = new AuthToken(
-                        rs.getString("token"),
+                        rs.getString("auth_token"),
                         rs.getString("username")
                 );
                 authTokens.add(token);
