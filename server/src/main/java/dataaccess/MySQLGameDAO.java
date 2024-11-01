@@ -7,21 +7,21 @@ import java.util.List;
 
 public class MySQLGameDAO {
 
-    public void addGame(GameData game) throws DataAccessException {
-        String sql = "INSERT INTO games (game_id, game_name, white_player_id, black_player_id) VALUES (?, ?, ?, ?);";
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, game.getGameID());
-            stmt.setString(2, game.getGameName());
-            stmt.setString(3, game.getWhiteUsername());
-            stmt.setString(4, game.getBlackUsername());
-            stmt.executeUpdate();
-
-        } catch (SQLException e) {
-            throw new DataAccessException("Error adding game to the database: " + e.getMessage());
-        }
-    }
+//    public void addGame(GameData game) throws DataAccessException {
+//        String sql = "INSERT INTO games (game_id, game_name, white_player_id, black_player_id) VALUES (?, ?, ?, ?);";
+//        try (Connection conn = DatabaseManager.getConnection();
+//             PreparedStatement stmt = conn.prepareStatement(sql)) {
+//
+//            stmt.setString(1, game.getGameID());
+//            stmt.setString(2, game.getGameName());
+//            stmt.setString(3, game.getWhiteUsername());
+//            stmt.setString(4, game.getBlackUsername());
+//            stmt.executeUpdate();
+//
+//        } catch (SQLException e) {
+//            throw new DataAccessException("Error adding game to the database: " + e.getMessage());
+//        }
+//    }
     public String createGame(GameData gameData) throws DataAccessException {
         String sql = "INSERT INTO games (game_name, white_player_id, black_player_id) VALUES (?, ?, ?)";
         try (Connection conn = DatabaseManager.getConnection();

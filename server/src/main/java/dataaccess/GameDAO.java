@@ -43,14 +43,14 @@ public class GameDAO {
         }
     }
 
-    public GameData getGame(String gameID) throws DataAccessException {
-        for (GameData game : games) {
-            if (game.getGameID().equals(gameID)) {
-                return game;
-            }
-        }
-        throw new DataAccessException("Game not found");
-    }
+//    public GameData getGame(String gameID) throws DataAccessException {
+//        for (GameData game : games) {
+//            if (game.getGameID().equals(gameID)) {
+//                return game;
+//            }
+//        }
+//        throw new DataAccessException("Game not found");
+//    }
 
 
     public void updateGame(GameData updatedGame) throws DataAccessException {

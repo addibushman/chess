@@ -25,8 +25,5 @@ public class UserData {
         return usersTable.get(username);
     }
 
-    public void clearUserData() {
-        usersTable.clear();
-    }
 }
 
