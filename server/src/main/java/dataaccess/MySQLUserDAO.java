@@ -65,7 +65,7 @@ public class MySQLUserDAO {
             while (rs.next()) {
                 User user = new User(
                         rs.getString("username"),
-                        rs.getString("password"),
+                        rs.getString("hashed_password"),
                         rs.getString("email")
                 );
                 users.add(user);
