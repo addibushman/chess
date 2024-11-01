@@ -15,7 +15,6 @@ public class LoginService {
         try {
             User user = DaoService.getInstance().getUserDAO().getUserByUsername(request.getUsername());
 
-            // Check if user exists and password matches the stored hash
             if (user != null && BCrypt.checkpw(request.getPassword(), user.getPassword())) {
                 String authToken = UUID.randomUUID().toString();
                 AuthToken token = new AuthToken(authToken, user.getUsername());

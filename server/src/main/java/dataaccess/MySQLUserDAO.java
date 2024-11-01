@@ -1,8 +1,6 @@
 package dataaccess;
 
-import model.GameData;
 import model.User;
-import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -15,7 +13,7 @@ public class MySQLUserDAO {
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-//            String hashedPassword = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt());
+
             stmt.setString(1, user.getUsername());
             stmt.setString(2, user.getPassword());
             stmt.setString(3, user.getEmail());
