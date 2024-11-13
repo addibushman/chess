@@ -4,8 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import model.AuthToken;
 import requests.*;
+import results.CreateGameResult;
 import results.LoginResult;
 import results.RegisterResult;
+import requests.CreateGameRequest;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -89,6 +91,28 @@ public class ServerFacade {
 
         if (response.statusCode() != 200) {
             throw new Exception("Logout failed: " + response.body());
+        }
+    }
+
+    public String createGame(String gameName, AuthToken token) throws Exception {
+        CreateGameRequest createGameRequest = new CreateGameRequest(gameName, token.getToken());
+
+        String requestBody = gson.toJson(createGameRequest);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/game"))
+                .header("Content-Type", "application/json")
+                .header("Authorization", token.getToken())
+                .POST(HttpRequest.BodyPublishers.ofString(requestBody, StandardCharsets.UTF_8))
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() == 200) {
+            CreateGameResult createGameResult = gson.fromJson(response.body(), CreateGameResult.class);
+            return String.valueOf(createGameResult.getGameID());
+        } else {
+            throw new Exception("Failed to create game: " + response.body());
         }
     }
 }

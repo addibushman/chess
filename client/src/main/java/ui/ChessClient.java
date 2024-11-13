@@ -131,7 +131,7 @@ public class ChessClient {
                 logout();
                 break;
             case "create game":
-                //createGame();
+                createGame();
                 break;
             case "list games":
                 //listGames();
@@ -148,10 +148,23 @@ public class ChessClient {
     }
 
     // Handle creating a game
-    // private static void createGame() {
-    // Placeholder for creating a game logic
-    // System.out.println("Game creation is not implemented yet.");
-    // }
+    private static void createGame() {
+        System.out.println("Enter a name for the new game: ");
+        String gameName = scanner.nextLine().trim();
+
+        if (gameName.isEmpty()) {
+            System.out.println("Game name cannot be empty. Please try again.");
+            return;
+        }
+
+        try {
+            String gameID = serverFacade.createGame(gameName, currentToken);
+            System.out.println("Game created successfully! Game ID: " + gameID);
+        } catch (Exception e) {
+            System.out.println("Failed to create game: " + e.getMessage());
+        }
+    }
+
 
     // Handle listing games
     // private static void listGames() {
