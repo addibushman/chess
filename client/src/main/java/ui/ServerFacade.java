@@ -54,7 +54,6 @@ public class ServerFacade {
         LoginRequest loginRequest = new LoginRequest(username, password);
 
         String requestBody = gson.toJson(loginRequest);
-        System.out.println("Login request body: " + requestBody);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(baseUrl + "/session"))
@@ -64,9 +63,6 @@ public class ServerFacade {
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        // Debugging
-        System.out.println("Response status: " + response.statusCode());
-        System.out.println("Response body: " + response.body());
 
         if (response.statusCode() == 200) {
             LoginResult loginResult = gson.fromJson(response.body(), LoginResult.class);
@@ -77,6 +73,22 @@ public class ServerFacade {
             }
         } else {
             throw new Exception("Login failed with status code " + response.statusCode() + ": " + response.body());
+        }
+    }
+
+    // Logout
+    public void logout(AuthToken token) throws Exception {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/session"))
+                .header("Content-Type", "application/json")
+                .header("Authorization", token.getToken())
+                .DELETE()
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 200) {
+            throw new Exception("Logout failed: " + response.body());
         }
     }
 }
