@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import model.AuthToken;
 import requests.*;
+import results.RegisterResult;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -22,22 +23,27 @@ public class ServerFacade {
         this.gson = new Gson();
     }
 
-    // Register first
+    //Register
     public AuthToken register(String username, String password, String email) throws Exception {
         RegisterRequest registerRequest = new RegisterRequest(username, password, email);
         String requestBody = gson.toJson(registerRequest);
+
+        //http url connection, look at slides and web api page
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(baseUrl + "/session"))
+                .uri(URI.create(baseUrl + "/user"))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(requestBody, StandardCharsets.UTF_8))
                 .build();
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
         if (response.statusCode() == 200) {
-            JsonObject jsonResponse = gson.fromJson(response.body(), JsonObject.class);
-            String setToken = jsonResponse.get("token").getAsString();
-            String setUsername = jsonResponse.get("username").getAsString();
-            return new AuthToken(setToken, setUsername);
+            RegisterResult registerResult = gson.fromJson(response.body(), RegisterResult.class);
+            if (registerResult.isSuccess()) {
+                return new AuthToken(registerResult.getAuthToken(), registerResult.getUsername());
+            } else {
+                throw new Exception("Registration failed: " + registerResult.getMessage());
+            }
         } else {
             throw new Exception("Registration failed: " + response.body());
         }

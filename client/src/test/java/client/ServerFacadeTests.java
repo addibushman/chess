@@ -46,7 +46,6 @@ public class ServerFacadeTests {
 
     @Test
     void testRegisterDuplicateUser() throws Exception {
-        // First, register the user
         facade.register("duplicateUser", "testPass", "test@mail.com");
 
         Exception exception = assertThrows(Exception.class, () -> facade.register("duplicateUser", "testPass", "test@mail.com"));
