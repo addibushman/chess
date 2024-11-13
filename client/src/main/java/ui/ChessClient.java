@@ -6,7 +6,6 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import model.AuthToken;
 import model.GameData;
-import ui.DisplayChessBoard;
 
 public class ChessClient {
 
@@ -117,6 +116,7 @@ public class ChessClient {
         System.out.println("Create Game - Create a new game");
         System.out.println("List Games - List all existing games");
         System.out.println("Play Game - Join an existing game");
+        System.out.println("Observe Game - Join an existing game as an observer");
 
         String command = scanner.nextLine().toLowerCase().trim();
 
@@ -134,7 +134,10 @@ public class ChessClient {
                 listGames();
                 break;
             case "play game":
-                //playGame();
+                playGame();
+                break;
+            case "observe game":
+                observeGame();
                 break;
             default:
                 System.out.println("Unknown command. Type 'help' for available commands.");
@@ -226,6 +229,47 @@ public class ChessClient {
         }
     }
     //handle observing game next (last one I think)
+    public static void observeGame() {
+        try {
+            // List available games
+            List<GameData> games = serverFacade.listGames(currentToken);
+            if (games.isEmpty()) {
+                System.out.println("No available games to observe.");
+                return;
+            }
+
+            // Display available games
+            System.out.println("Available Games:");
+            for (int i = 0; i < games.size(); i++) {
+                GameData game = games.get(i);
+                System.out.println((i + 1) + ". " + game.getGameName() + " (White: " + game.getWhiteUsername() + ", Black: " + game.getBlackUsername() + ")");
+            }
+
+            // Prompt user to select a game by number
+            System.out.print("Enter the number of the game you want to observe: ");
+            int gameNumber = Integer.parseInt(scanner.nextLine().trim());
+
+            // Validate the game selection
+            if (gameNumber < 1 || gameNumber > games.size()) {
+                System.out.println("Invalid game number. Please try again.");
+                return;
+            }
+
+            // Get the selected game by index
+            GameData selectedGame = games.get(gameNumber - 1);
+
+            // Display the empty chessboard (this is just a placeholder for now)
+            System.out.println("You are observing the game: " + selectedGame.getGameName());
+            System.out.println("Displaying an empty chessboard...");
+
+            // Call DisplayChessBoard to show the empty board
+            DisplayChessBoard.displayChessBoard();
+
+        } catch (Exception e) {
+            System.out.println("Error observing game: " + e.getMessage());
+        }
+    }
+
 }
 
 

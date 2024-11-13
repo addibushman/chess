@@ -36,6 +36,7 @@ public class ServerFacadeTests {
         var port = server.run(0);
         System.out.println("Started test HTTP server on " + port);
         facade = new ServerFacade(port);
+
     }
     @BeforeEach
     void clearDatabase() throws Exception {
@@ -209,10 +210,27 @@ void testRegisterAndLogin() throws Exception {
             assertTrue(games.size() > 0, "Game should be listed after creation");
             chessClient.playGame();
             assertTrue(true);
-
         } catch (Exception e) {
             fail("playGame should not have thrown an exception: " + e.getMessage());
         }
     }
+//observe game tests
+@Test
+public void testObserveGameSuccess() {
+    try {
+        AuthToken registerToken = facade.register("testUser", "testPass", "test@mail.com");
+        currentToken = registerToken;
+        assertNotNull(registerToken);
+        assertTrue(registerToken.getToken().length() > 10);
+        String gameID = facade.createGame("Test Game", currentToken);
+        assertNotNull(gameID);
+        List<GameData> games = facade.listGames(currentToken);
+        assertTrue(games.size() > 0, "Game should be listed after creation");
+        chessClient.observeGame();
+        System.out.println("Successfully joined the game as " + currentToken.getUsername());
+    } catch (Exception e) {
+        fail("observeGame should not have thrown an exception: " + e.getMessage());
+    }
+}
 
 }

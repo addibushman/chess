@@ -156,5 +156,21 @@ public class ServerFacade {
 
     //observe game
 
+    public void observeGame(String gameID, AuthToken token) throws Exception {
+        String requestBody = gson.toJson(new JoinGameRequest("OBSERVING", gameID, token.getToken()));
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/game"))
+                .header("Content-Type", "application/json")
+                .header("Authorization", token.getToken())
+                .PUT(HttpRequest.BodyPublishers.ofString(requestBody))
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 200) {
+            throw new Exception("Failed to observe game: " + response.body());
+        }
+    }
 
 }
