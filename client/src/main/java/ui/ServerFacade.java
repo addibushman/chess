@@ -3,10 +3,9 @@ package ui;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import model.AuthToken;
+import model.GameData;
 import requests.*;
-import results.CreateGameResult;
-import results.LoginResult;
-import results.RegisterResult;
+import results.*;
 import requests.CreateGameRequest;
 
 import java.net.URI;
@@ -14,6 +13,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 public class ServerFacade {
     private final String baseUrl;
@@ -115,4 +115,31 @@ public class ServerFacade {
             throw new Exception("Failed to create game: " + response.body());
         }
     }
+
+    //list games
+    public List<GameData> listGames(AuthToken token) throws Exception {
+        ListGamesRequest listGamesRequest = new ListGamesRequest(token.getToken());
+        String requestBody = gson.toJson(listGamesRequest);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/game"))
+                .header("Content-Type", "application/json")
+                .header("Authorization", token.getToken())
+                .GET()
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() == 200) {
+            ListGamesResult result = gson.fromJson(response.body(), ListGamesResult.class);
+            return result.getGames();
+        } else {
+            throw new Exception("Failed to retrieve games: " + response.body());
+        }
+    }
+    // Play Game/Join Game
+
+    //observe game
+
+
 }

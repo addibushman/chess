@@ -1,9 +1,12 @@
 package ui;
 
+import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import model.AuthToken;
+import model.GameData;
+import ui.DisplayChessBoard;
 
 public class ChessClient {
 
@@ -15,14 +18,13 @@ public class ChessClient {
         serverFacade = new ServerFacade(8080);
         while (true) {
             if (currentToken == null) {
-                preloginMenu();  // Call prelogin menu if not logged in
+                preloginMenu();
             } else {
-                postloginMenu();  // Call postlogin menu if logged in
+                postloginMenu();
             }
         }
     }
 
-    // Pre-login menu is for login, register, help, and quit
     private static void preloginMenu() {
         System.out.println("\nPrelogin Menu:");
         System.out.println("Help - Displays available commands");
@@ -50,7 +52,6 @@ public class ChessClient {
         }
     }
 
-    // Display Help text
     private static void displayHelp() {
         System.out.println("Commands Available:");
         System.out.println("Help - Displays available commands");
@@ -59,13 +60,11 @@ public class ChessClient {
         System.out.println("Register - Create a new account");
     }
 
-    // Exit
     private static void quitProgram() {
         System.out.println("Goodbye!");
         System.exit(0);
     }
 
-    // Registration
     private static void register() {
         System.out.println("Enter username: ");
         String username = scanner.nextLine().trim();
@@ -89,7 +88,6 @@ public class ChessClient {
         }
     }
 
-    // Handle user login
     private static void login() {
         System.out.println("Enter username: ");
         String username = scanner.nextLine().trim();
@@ -98,7 +96,6 @@ public class ChessClient {
         String password = scanner.nextLine().trim();
 
         try {
-            // Attempt to login using the ServerFacade
             currentToken = serverFacade.login(username, password);
             System.out.println("Login successful! Welcome " + currentToken.getUsername());
         } catch (Exception e) {
@@ -113,13 +110,13 @@ public class ChessClient {
         return matcher.matches();
     }
 
-    // Post-login menu - Once the user is logged in, they can access game commands
     private static void postloginMenu() {
         System.out.println("\nPostlogin Menu:");
         System.out.println("Help - Displays available commands");
         System.out.println("Logout - Log out of your account");
         System.out.println("Create Game - Create a new game");
         System.out.println("List Games - List all existing games");
+        System.out.println("Play Game - Join an existing game");
 
         String command = scanner.nextLine().toLowerCase().trim();
 
@@ -134,7 +131,10 @@ public class ChessClient {
                 createGame();
                 break;
             case "list games":
-                //listGames();
+                listGames();
+                break;
+            case "play game":
+                //playGame();
                 break;
             default:
                 System.out.println("Unknown command. Type 'help' for available commands.");
@@ -167,10 +167,23 @@ public class ChessClient {
 
 
     // Handle listing games
-    // private static void listGames() {
-    // Placeholder for listing games logic
-    // System.out.println("Listing games is not implemented yet.");
-    // }
+    private static void listGames() {
+        try {
+            List<GameData> games = serverFacade.listGames(currentToken); // Call listGames from ServerFacade
+            if (games.isEmpty()) {
+                System.out.println("No games available.");
+            } else {
+                System.out.println("Games currently available:");
+                for (int i = 0; i < games.size(); i++) {
+                    GameData game = games.get(i);
+                    System.out.println((i + 1) + ". Game ID: " + game.getGameID() + ", Game Name: " + game.getGameName());
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Failed to retrieve games: " + e.getMessage());
+        }
+    }
+    // handle playing game next
 }
 
 

@@ -1,13 +1,22 @@
 package client;
 
+import dataaccess.DataAccessException;
 import model.AuthToken;
+import model.GameData;
 import org.junit.jupiter.api.*;
+import requests.ListGamesRequest;
+import results.ListGamesResult;
 import server.Server;
 import service.DaoService;
+import service.ListGamesService;
+import ui.ChessClient;
 import ui.ServerFacade;
 
 import org.junit.jupiter.api.Test;
 
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -16,6 +25,10 @@ public class ServerFacadeTests {
 
     private static Server server;
     private static ServerFacade facade;
+    private ListGamesService listGamesService;
+    private ChessClient chessClient;
+    private AuthToken currentToken;
+
 
     @BeforeAll
     public static void init() {
@@ -27,6 +40,18 @@ public class ServerFacadeTests {
     @BeforeEach
     void clearDatabase() throws Exception {
         DaoService.getInstance().getUserDAO().clear();
+    }
+
+    @BeforeEach
+    public void setUp() throws DataAccessException {
+        listGamesService = new ListGamesService();
+
+        // Clear previous test data (reset state before each test)
+        DaoService.getInstance().clear();
+
+        // Add valid auth token for testing
+        AuthToken validToken = new AuthToken("validToken", "testUser");
+        DaoService.getInstance().getAuthDAO().addAuthToken(validToken);
     }
 
     @AfterAll
@@ -131,5 +156,27 @@ void testRegisterAndLogin() throws Exception {
         Exception exception = assertThrows(Exception.class, () -> facade.createGame("", loginToken));
         assertTrue(exception.getMessage().contains("Failed to create game: Error: Game name cannot be empty"));
     }
+
+    @Test
+    public void testListGamesSuccess() {
+        ListGamesRequest request = new ListGamesRequest("validToken");
+        ListGamesResult result = listGamesService.listGames(request);
+
+        // Assert that no games exist initially
+        assertTrue(result.isSuccess());
+        assertEquals(0, result.getGames().size(), "Expected no games in the list initially");
+        assertEquals("Games retrieved successfully", result.getMessage());
+    }
+
+    @Test
+    public void testListGamesFailureInvalidToken() {
+        ListGamesRequest request = new ListGamesRequest("invalidToken");
+        ListGamesResult result = listGamesService.listGames(request);
+
+        assertFalse(result.isSuccess());
+        assertEquals("Error Invalid authToken", result.getMessage());
+    }
+
+    //join game tests next
 
 }
