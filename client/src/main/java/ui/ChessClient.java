@@ -183,7 +183,49 @@ public class ChessClient {
             System.out.println("Failed to retrieve games: " + e.getMessage());
         }
     }
-    // handle playing game next
+    // handle playing a game
+    public static void playGame() {
+        try {
+            List<GameData> games = serverFacade.listGames(currentToken); // Call listGames from ServerFacade
+            if (games.isEmpty()) {
+                System.out.println("No available games to join.");
+                return;
+            }
+            System.out.println("Available Games:");
+            for (int i = 0; i < games.size(); i++) {
+                GameData game = games.get(i);
+                System.out.println((i + 1) + ". " + game.getGameName() + " (White: " + game.getWhiteUsername() + ", Black: " + game.getBlackUsername() + ")");
+            }
+            System.out.print("Enter the number of the game you want to join: ");
+            String input = scanner.nextLine().trim();
+
+            int gameNumber;
+            try {
+                gameNumber = Integer.parseInt(input);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a valid game number.");
+                return;
+            }
+            if (gameNumber < 1 || gameNumber > games.size()) {
+                System.out.println("Invalid game number. Please try again.");
+                return;
+            }
+            GameData selectedGame = games.get(gameNumber - 1);
+            System.out.print("Enter the color you want to play (WHITE/BLACK): ");
+            String playerColor = scanner.nextLine().trim().toUpperCase();
+            try {
+                serverFacade.joinGame(selectedGame.getGameID(), playerColor, currentToken);
+                System.out.println("Successfully joined the game " + selectedGame.getGameName() + " as " + playerColor);
+            } catch (Exception e) {
+                System.out.println("Error joining game: " + e.getMessage());
+                return;
+            }
+            DisplayChessBoard.displayChessBoard();
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+    //handle observing game next (last one I think)
 }
 
 

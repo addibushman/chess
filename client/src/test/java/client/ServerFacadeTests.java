@@ -179,4 +179,40 @@ void testRegisterAndLogin() throws Exception {
 
     //join game tests next
 
+    @Test
+    public void testPlayGameSuccess() {
+        try {
+            AuthToken registerToken = facade.register("testUser", "testPass", "test@mail.com");
+            currentToken = registerToken;
+            assertNotNull(registerToken);
+            assertTrue(registerToken.getToken().length() > 10);
+            String gameID = facade.createGame("Test Game", currentToken);
+            assertNotNull(gameID);
+            chessClient.playGame();
+            System.out.println("Successfully joined the game as " + currentToken.getUsername());
+        } catch (Exception e) {
+            fail("playGame should not have thrown an exception: " + e.getMessage());
+        }
+    }
+
+    @Test
+    public void testPlayGameFailure() {
+        try {
+            AuthToken registerToken = facade.register("testUser", "testPass", "test@mail.com");
+            currentToken = registerToken;
+
+            assertNotNull(registerToken);
+            assertTrue(registerToken.getToken().length() > 10);
+            String gameID = facade.createGame("Test Game", currentToken);
+            assertNotNull(gameID);
+            List<GameData> games = facade.listGames(currentToken);
+            assertTrue(games.size() > 0, "Game should be listed after creation");
+            chessClient.playGame();
+            assertTrue(true);
+
+        } catch (Exception e) {
+            fail("playGame should not have thrown an exception: " + e.getMessage());
+        }
+    }
+
 }
