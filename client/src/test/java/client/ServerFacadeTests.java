@@ -3,6 +3,7 @@ package client;
 import model.AuthToken;
 import org.junit.jupiter.api.*;
 import server.Server;
+import service.DaoService;
 import ui.ServerFacade;
 
 import org.junit.jupiter.api.Test;
@@ -22,6 +23,10 @@ public class ServerFacadeTests {
         var port = server.run(0);
         System.out.println("Started test HTTP server on " + port);
         facade = new ServerFacade(port);
+    }
+    @BeforeEach
+    void clearDatabase() throws Exception {
+        DaoService.getInstance().getUserDAO().clear();
     }
 
     @AfterAll
@@ -53,4 +58,33 @@ public class ServerFacadeTests {
         assertTrue(exception.getMessage().contains("Registration failed"));
     }
 //next will do Login tests
+@Test
+void testRegisterAndLogin() throws Exception {
+    // Step 1: Register the user
+    AuthToken registerToken = facade.register("testUser", "testPass", "test@mail.com");
+
+    assertNotNull(registerToken);
+    assertTrue(registerToken.getToken().length() > 10);
+
+    AuthToken loginToken = facade.login("testUser", "testPass");
+
+    assertNotNull(loginToken);
+    assertTrue(loginToken.getToken().length() > 10);
+    assertEquals("testUser", loginToken.getUsername());
+}
+
+    @Test
+    void testLoginInvalidCredentials() throws Exception {
+        AuthToken registerToken = facade.register("testUser", "testPass", "test@mail.com");
+
+        assertNotNull(registerToken);
+        assertTrue(registerToken.getToken().length() > 10);
+
+        Exception exception = assertThrows(Exception.class, () -> facade.login("testUser", "wrongPassword"));
+        assertTrue(exception.getMessage().contains("Login failed"));
+
+        exception = assertThrows(Exception.class, () -> facade.login("wrongUser", "testPass"));
+        assertTrue(exception.getMessage().contains("Login failed"));
+    }
+
 }

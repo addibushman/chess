@@ -41,7 +41,7 @@ public class ChessClient {
                 quitProgram();
                 break;
             case "login":
-                //login();
+                login();
                 break;
             case "register":
                 register();
@@ -66,23 +66,6 @@ public class ChessClient {
         System.exit(0);
     }
 
-    //Handle user login
-//    private static void login() {
-//        System.out.println("Enter username: ");
-//        String username = scanner.nextLine().trim();
-//
-//        System.out.println("Enter password: ");
-//        String password = scanner.nextLine().trim();
-//
-//        try {
-//            // Attempt to login using the ServerFacade
-//            currentToken = serverFacade.login(username, password);
-//            System.out.println("Login successful! Welcome " + currentToken.getUsername());
-//        } catch (Exception e) {
-//            System.out.println("Login failed: " + e.getMessage());
-//        }
-//    }
-
     //registration
     private static void register() {
         System.out.println("Enter username: ");
@@ -104,6 +87,23 @@ public class ChessClient {
             System.out.println("Registration successful! Welcome " + currentToken.getUsername());
         } catch (Exception e) {
             System.out.println("Registration failed: " + e.getMessage());
+        }
+    }
+
+    //Handle user login
+    private static void login() {
+        System.out.println("Enter username: ");
+        String username = scanner.nextLine().trim();
+
+        System.out.println("Enter password: ");
+        String password = scanner.nextLine().trim();
+
+        try {
+            // Attempt to login using the ServerFacade
+            currentToken = serverFacade.login(username, password);
+            System.out.println("Login successful! Welcome " + currentToken.getUsername());
+        } catch (Exception e) {
+            System.out.println("Login failed: " + e.getMessage());
         }
     }
 
