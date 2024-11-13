@@ -15,15 +15,14 @@ public class ChessClient {
         serverFacade = new ServerFacade(8080);
         while (true) {
             if (currentToken == null) {
-                preloginMenu();
+                preloginMenu();  // Call prelogin menu if not logged in
             } else {
-                break;
-                //postloginMenu(); // will implement this later
+                postloginMenu();  // Call postlogin menu if logged in
             }
         }
     }
 
-    //Pre-login menu is for login, register, help, and quit
+    // Pre-login menu is for login, register, help, and quit
     private static void preloginMenu() {
         System.out.println("\nPrelogin Menu:");
         System.out.println("Help - Displays available commands");
@@ -51,7 +50,7 @@ public class ChessClient {
         }
     }
 
-    //Display Help text
+    // Display Help text
     private static void displayHelp() {
         System.out.println("Commands Available:");
         System.out.println("Help - Displays available commands");
@@ -60,13 +59,13 @@ public class ChessClient {
         System.out.println("Register - Create a new account");
     }
 
-    //Exit
+    // Exit
     private static void quitProgram() {
         System.out.println("Goodbye!");
         System.exit(0);
     }
 
-    //registration
+    // Registration
     private static void register() {
         System.out.println("Enter username: ");
         String username = scanner.nextLine().trim();
@@ -90,7 +89,7 @@ public class ChessClient {
         }
     }
 
-    //Handle user login
+    // Handle user login
     private static void login() {
         System.out.println("Enter username: ");
         String username = scanner.nextLine().trim();
@@ -113,5 +112,52 @@ public class ChessClient {
         Matcher matcher = pattern.matcher(email);
         return matcher.matches();
     }
+
+    // Post-login menu - Once the user is logged in, they can access game commands
+    private static void postloginMenu() {
+        System.out.println("\nPostlogin Menu:");
+        System.out.println("Help - Displays available commands");
+        System.out.println("Logout - Log out of your account");
+        System.out.println("Create Game - Create a new game");
+        System.out.println("List Games - List all existing games");
+
+        String command = scanner.nextLine().toLowerCase().trim();
+
+        switch (command) {
+            case "help":
+                displayHelp();
+                break;
+            case "logout":
+                logout();
+                break;
+            case "create game":
+                //createGame();
+                break;
+            case "list games":
+                //listGames();
+                break;
+            default:
+                System.out.println("Unknown command. Type 'help' for available commands.");
+        }
+    }
+
+    // Handle logging out
+    private static void logout() {
+        currentToken = null;
+        System.out.println("You have been logged out.");
+    }
+
+    // Handle creating a game
+    // private static void createGame() {
+    // Placeholder for creating a game logic
+    // System.out.println("Game creation is not implemented yet.");
+    // }
+
+    // Handle listing games
+    // private static void listGames() {
+    // Placeholder for listing games logic
+    // System.out.println("Listing games is not implemented yet.");
+    // }
 }
+
 
