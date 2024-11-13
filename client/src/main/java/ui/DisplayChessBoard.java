@@ -4,9 +4,47 @@ import model.GameData;
 
 public class DisplayChessBoard {
 
-    public static void displayBoard(GameData gameData) {
-        String[][] board = initializeBoard(gameData);
+    public static void displayChessBoard() {
+        String[][] board = {
+                {"R", "N", "B", "K", "Q", "B", "N", "R"},
+                {"P", "P", "P", "P", "P", "P", "P", "P"},
+                {" ", " ", " ", " ", " ", " ", " ", " "},
+                {" ", " ", " ", " ", " ", " ", " ", " "},
+                {" ", " ", " ", " ", " ", " ", " ", " "},
+                {" ", " ", " ", " ", " ", " ", " ", " "},
+                {"p", "p", "p", "p", "p", "p", "p", "p"},
+                {"r", "n", "b", "k", "q", "b", "n", "r"}
+        };
+
+        System.out.println("White's Perspective:");
         printBoard(board);
+        System.out.println("\nBlack's Perspective:");
+        printBoard(flipBoard(board));
+    }
+
+    private static void printBoard(String[][] board) {
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                String square = board[i][j];
+                if ((i + j) % 2 == 0) {
+                    System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY + square + EscapeSequences.RESET_BG_COLOR + " ");
+                } else {
+                    System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY + square + EscapeSequences.RESET_BG_COLOR + " ");
+                }
+            }
+            System.out.println();
+        }
+    }
+
+    private static String[][] flipBoard(String[][] board) {
+        // Flip the board for black's perspective
+        String[][] flippedBoard = new String[8][8];
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                flippedBoard[i][j] = board[7 - i][7 - j];
+            }
+        }
+        return flippedBoard;
     }
 
     private static String[][] initializeBoard(GameData gameData) {
@@ -29,25 +67,6 @@ public class DisplayChessBoard {
         return board;
     }
 
-    private static void printBoard(String[][] board) {
-        StringBuilder boardDisplay = new StringBuilder();
-
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                String piece = board[i][j];
-                String squareColor = (i + j) % 2 == 0 ? EscapeSequences.SET_BG_COLOR_LIGHT_GREY : EscapeSequences.SET_BG_COLOR_DARK_GREY;
-                boardDisplay.append(squareColor).append(piece).append(EscapeSequences.RESET_BG_COLOR);
-            }
-            boardDisplay.append("\n");
-        }
-
-        System.out.println(boardDisplay.toString());
-    }
-
-    public static void displayBoardBlackPerspective(GameData gameData) {
-        String[][] board = initializeBoard(gameData);
-        printBoardBlackPerspective(board);
-    }
 
     private static void printBoardBlackPerspective(String[][] board) {
         StringBuilder boardDisplay = new StringBuilder();
