@@ -2,6 +2,8 @@ package ui;
 
 import java.util.List;
 import java.util.Scanner;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 import model.AuthToken;
 import model.GameData;
 
@@ -81,9 +83,10 @@ public class ChessClient {
             currentToken = serverFacade.register(username, password, email);
             System.out.println("Registration successful! Welcome " + currentToken.getUsername());
         } catch (Exception e) {
-            System.out.println("Registration failed: " + e.getMessage());
+            System.out.println(e.getMessage());
         }
     }
+
 
     private static void login() {
         System.out.println("Enter username: ");
@@ -96,13 +99,15 @@ public class ChessClient {
             currentToken = serverFacade.login(username, password);
             System.out.println("Login successful! Welcome " + currentToken.getUsername());
         } catch (Exception e) {
-            System.out.println("Login failed: " + e.getMessage());
+            System.out.println(e.getMessage());
         }
     }
 
     private static boolean isValidEmail(String email) {
         String regex = "^[A-Za-z0-9+_.-]+@(.+)$";
-        return email.matches(regex);
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(email);
+        return matcher.matches();
     }
 
     private static void postloginMenu() {
@@ -156,7 +161,7 @@ public class ChessClient {
 
         try {
             String gameID = serverFacade.createGame(gameName, currentToken);
-            System.out.println("Game created successfully! Game ID: " + gameID);
+            System.out.println("Game created successfully!");
         } catch (Exception e) {
             System.out.println("Failed to create game: " + e.getMessage());
         }
@@ -233,7 +238,6 @@ public class ChessClient {
 
             GameData selectedGame = games.get(gameNumber - 1);
             System.out.println("You are observing the game: " + selectedGame.getGameName());
-            System.out.println("Displaying an empty chessboard...");
             DisplayChessBoard.displayChessBoard();
 
         } catch (Exception e) {

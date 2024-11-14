@@ -1,6 +1,6 @@
 package ui;
 
-import com.google.gson.Gson;
+import com.google.gson.*;
 import model.AuthToken;
 import model.GameData;
 import requests.*;
@@ -46,14 +46,29 @@ public class ServerFacade {
                 throw new Exception("Registration failed: " + registerResult.getMessage());
             }
         } else {
-            throw new Exception("Registration failed: " + response.body());
+            String errorMessage = extractErrorMessage(response.body());
+            throw new Exception("Registration failed: " + errorMessage);
         }
     }
+
+    //method to make sure JSON doesn't print out, but only the error message within
+    private String extractErrorMessage(String responseBody) {
+        try {
+            JsonObject json = JsonParser.parseString(responseBody).getAsJsonObject();
+            JsonElement messageElement = json.get("message");
+            if (messageElement != null) {
+                return messageElement.getAsString();
+            }
+        } catch (JsonSyntaxException e) {
+            return responseBody;
+        }
+        return "An unknown error occurred";
+    }
+
 
     //next login
     public AuthToken login(String username, String password) throws Exception {
         LoginRequest loginRequest = new LoginRequest(username, password);
-
         String requestBody = gson.toJson(loginRequest);
 
         HttpRequest request = HttpRequest.newBuilder()
@@ -64,7 +79,6 @@ public class ServerFacade {
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-
         if (response.statusCode() == 200) {
             LoginResult loginResult = gson.fromJson(response.body(), LoginResult.class);
             if (loginResult.isSuccess()) {
@@ -73,7 +87,8 @@ public class ServerFacade {
                 throw new Exception("Login failed: " + loginResult.getMessage());
             }
         } else {
-            throw new Exception("Login failed with status code " + response.statusCode() + ": " + response.body());
+            String errorMessage = extractErrorMessage(response.body());
+            throw new Exception("Login failed: " + errorMessage);
         }
     }
 
@@ -174,5 +189,4 @@ public class ServerFacade {
             throw new Exception("Failed to observe game: " + response.body());
         }
     }
-
 }

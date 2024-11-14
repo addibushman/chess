@@ -16,12 +16,21 @@ public class DisplayChessBoard {
 
         System.out.println("White's Perspective:");
         printBoard(board);
+
         System.out.println("\nBlack's Perspective:");
         printBoard(flipBoard(board));
     }
 
     private static void printBoard(String[][] board) {
+        System.out.print("   ");
+        for (char c = 'a'; c <= 'h'; c++) {
+            System.out.print(c + " ");
+        }
+        System.out.println();
+
         for (int i = 0; i < 8; i++) {
+            System.out.print((8 - i) + "  ");
+
             for (int j = 0; j < 8; j++) {
                 String square = board[i][j];
                 if ((i + j) % 2 == 0) {
@@ -30,8 +39,15 @@ public class DisplayChessBoard {
                     System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY + square + EscapeSequences.RESET_BG_COLOR + " ");
                 }
             }
-            System.out.println();
+
+            System.out.println("  " + (8 - i));
         }
+
+        System.out.print("   ");
+        for (char c = 'a'; c <= 'h'; c++) {
+            System.out.print(c + " ");
+        }
+        System.out.println();
     }
 
     private static String[][] flipBoard(String[][] board) {
@@ -43,6 +59,4 @@ public class DisplayChessBoard {
         }
         return flippedBoard;
     }
-
 }
-
