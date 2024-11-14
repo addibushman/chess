@@ -172,7 +172,8 @@ public class ChessClient {
         System.out.println("Available Games:");
         for (int i = 0; i < games.size(); i++) {
             GameData game = games.get(i);
-            System.out.println((i + 1) + ". " + game.getGameName() + " (White: " + game.getWhiteUsername() + ", Black: " + game.getBlackUsername() + ")");
+            System.out.println((i + 1) + ". " + game.getGameName() + " (White: " + game.getWhiteUsername() +
+                    ", Black: " + game.getBlackUsername() + ")");
         }
     }
 
