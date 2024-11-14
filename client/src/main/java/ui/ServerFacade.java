@@ -154,7 +154,6 @@ public class ServerFacade {
             throw new Exception("Failed to retrieve games: " + response.body());
         }
     }
-    // Play Game/Join Game
     public void joinGame(String gameID, String playerColor, AuthToken token) throws Exception {
         JoinGameRequest joinGameRequest = new JoinGameRequest(playerColor, gameID, token.getToken());
         String requestBody = gson.toJson(joinGameRequest);
@@ -165,12 +164,13 @@ public class ServerFacade {
                 .PUT(HttpRequest.BodyPublishers.ofString(requestBody, StandardCharsets.UTF_8))
                 .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
         if (response.statusCode() == 200) {
         } else {
-            throw new Exception("Failed to join game: " + response.body());
+            String errorMessage = extractErrorMessage(response.body());
+            throw new Exception("Failed to join game: " + errorMessage);
         }
     }
-
     //observe game
 
     public void observeGame(String gameID, AuthToken token) throws Exception {
