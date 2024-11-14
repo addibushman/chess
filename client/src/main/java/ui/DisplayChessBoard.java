@@ -1,7 +1,5 @@
 package ui;
 
-import model.GameData;
-
 public class DisplayChessBoard {
 
     public static void displayChessBoard() {

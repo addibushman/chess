@@ -1,7 +1,6 @@
 package ui;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import model.AuthToken;
 import model.GameData;
 import requests.*;
