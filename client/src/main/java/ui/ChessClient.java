@@ -9,7 +9,7 @@ import model.GameData;
 
 public class ChessClient {
 
-    private static ServerFacade serverFacade;
+    public static ServerFacade serverFacade;
     private static AuthToken currentToken = null;
     private static Scanner scanner = new Scanner(System.in);
 
@@ -168,7 +168,6 @@ public class ChessClient {
         }
     }
 
-
     // Handle listing games
     private static void listGames() {
         try {
@@ -228,41 +227,34 @@ public class ChessClient {
             System.out.println("Error: " + e.getMessage());
         }
     }
-    //handle observing game next (last one I think)
+    // handle observing a game
     public static void observeGame() {
         try {
-            // List available games
             List<GameData> games = serverFacade.listGames(currentToken);
             if (games.isEmpty()) {
                 System.out.println("No available games to observe.");
                 return;
             }
 
-            // Display available games
             System.out.println("Available Games:");
             for (int i = 0; i < games.size(); i++) {
                 GameData game = games.get(i);
                 System.out.println((i + 1) + ". " + game.getGameName() + " (White: " + game.getWhiteUsername() + ", Black: " + game.getBlackUsername() + ")");
             }
 
-            // Prompt user to select a game by number
             System.out.print("Enter the number of the game you want to observe: ");
             int gameNumber = Integer.parseInt(scanner.nextLine().trim());
 
-            // Validate the game selection
             if (gameNumber < 1 || gameNumber > games.size()) {
                 System.out.println("Invalid game number. Please try again.");
                 return;
             }
 
-            // Get the selected game by index
             GameData selectedGame = games.get(gameNumber - 1);
 
-            // Display the empty chessboard (this is just a placeholder for now)
             System.out.println("You are observing the game: " + selectedGame.getGameName());
             System.out.println("Displaying an empty chessboard...");
 
-            // Call DisplayChessBoard to show the empty board
             DisplayChessBoard.displayChessBoard();
 
         } catch (Exception e) {

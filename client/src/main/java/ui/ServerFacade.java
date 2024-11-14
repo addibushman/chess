@@ -95,25 +95,28 @@ public class ServerFacade {
     }
 
     public String createGame(String gameName, AuthToken token) throws Exception {
-        CreateGameRequest createGameRequest = new CreateGameRequest(gameName, token.getToken());
+        if (gameName == null || gameName.trim().isEmpty()) {
+            throw new Exception("Failed to create game: Error: Game name cannot be empty");
+        }
 
+        // Proceed with the game creation logic if the game name is valid
+        CreateGameRequest createGameRequest = new CreateGameRequest(gameName, token.getToken());
         String requestBody = gson.toJson(createGameRequest);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(baseUrl + "/game"))
                 .header("Content-Type", "application/json")
                 .header("Authorization", token.getToken())
-                .POST(HttpRequest.BodyPublishers.ofString(requestBody, StandardCharsets.UTF_8))
+                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                 .build();
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        if (response.statusCode() == 200) {
-            CreateGameResult createGameResult = gson.fromJson(response.body(), CreateGameResult.class);
-            return String.valueOf(createGameResult.getGameID());
-        } else {
+        if (response.statusCode() != 200) {
             throw new Exception("Failed to create game: " + response.body());
         }
+
+        return response.body();
     }
 
     //list games

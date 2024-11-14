@@ -15,7 +15,7 @@ import ui.ServerFacade;
 import org.junit.jupiter.api.Test;
 
 
-import java.util.ArrayList;
+
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -46,11 +46,8 @@ public class ServerFacadeTests {
     @BeforeEach
     public void setUp() throws DataAccessException {
         listGamesService = new ListGamesService();
-
-        // Clear previous test data (reset state before each test)
         DaoService.getInstance().clear();
 
-        // Add valid auth token for testing
         AuthToken validToken = new AuthToken("validToken", "testUser");
         DaoService.getInstance().getAuthDAO().addAuthToken(validToken);
     }
@@ -86,7 +83,6 @@ public class ServerFacadeTests {
 //next will do Login tests
 @Test
 void testRegisterAndLogin() throws Exception {
-    // Step 1: Register the user
     AuthToken registerToken = facade.register("testUser", "testPass", "test@mail.com");
 
     assertNotNull(registerToken);
@@ -158,12 +154,11 @@ void testRegisterAndLogin() throws Exception {
         assertTrue(exception.getMessage().contains("Failed to create game: Error: Game name cannot be empty"));
     }
 
+
     @Test
     public void testListGamesSuccess() {
         ListGamesRequest request = new ListGamesRequest("validToken");
         ListGamesResult result = listGamesService.listGames(request);
-
-        // Assert that no games exist initially
         assertTrue(result.isSuccess());
         assertEquals(0, result.getGames().size(), "Expected no games in the list initially");
         assertEquals("Games retrieved successfully", result.getMessage());
@@ -232,5 +227,4 @@ public void testObserveGameSuccess() {
         fail("observeGame should not have thrown an exception: " + e.getMessage());
     }
 }
-
 }

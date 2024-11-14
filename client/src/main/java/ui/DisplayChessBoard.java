@@ -37,7 +37,6 @@ public class DisplayChessBoard {
     }
 
     private static String[][] flipBoard(String[][] board) {
-        // Flip the board for black's perspective
         String[][] flippedBoard = new String[8][8];
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
