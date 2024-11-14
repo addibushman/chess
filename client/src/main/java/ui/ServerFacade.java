@@ -98,7 +98,7 @@ public class ServerFacade {
             throw new Exception("Failed to create game: Error: Game name cannot be empty");
         }
 
-        // Proceed with the game creation logic if the game name is valid
+
         CreateGameRequest createGameRequest = new CreateGameRequest(gameName, token.getToken());
         String requestBody = gson.toJson(createGameRequest);
 
