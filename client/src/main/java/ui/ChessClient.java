@@ -2,8 +2,6 @@ package ui;
 
 import java.util.List;
 import java.util.Scanner;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 import model.AuthToken;
 import model.GameData;
 
@@ -104,9 +102,7 @@ public class ChessClient {
 
     private static boolean isValidEmail(String email) {
         String regex = "^[A-Za-z0-9+_.-]+@(.+)$";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(email);
-        return matcher.matches();
+        return email.matches(regex);
     }
 
     private static void postloginMenu() {
@@ -144,13 +140,11 @@ public class ChessClient {
         }
     }
 
-    // Handle logging out
     private static void logout() {
         currentToken = null;
         System.out.println("You have been logged out.");
     }
 
-    // Handle creating a game
     private static void createGame() {
         System.out.println("Enter a name for the new game: ");
         String gameName = scanner.nextLine().trim();
@@ -168,50 +162,44 @@ public class ChessClient {
         }
     }
 
+
+    private static void displayGames(List<GameData> games) {
+        if (games.isEmpty()) {
+            System.out.println("No games available.");
+            return;
+        }
+
+        System.out.println("Available Games:");
+        for (int i = 0; i < games.size(); i++) {
+            GameData game = games.get(i);
+            System.out.println((i + 1) + ". " + game.getGameName() + " (White: " + game.getWhiteUsername() + ", Black: " + game.getBlackUsername() + ")");
+        }
+    }
+
     // Handle listing games
     private static void listGames() {
         try {
-            List<GameData> games = serverFacade.listGames(currentToken); // Call listGames from ServerFacade
-            if (games.isEmpty()) {
-                System.out.println("No games available.");
-            } else {
-                System.out.println("Games currently available:");
-                for (int i = 0; i < games.size(); i++) {
-                    GameData game = games.get(i);
-                    System.out.println((i + 1) + ". Game ID: " + game.getGameID() + ", Game Name: " + game.getGameName());
-                }
-            }
+            List<GameData> games = serverFacade.listGames(currentToken);
+            displayGames(games);
         } catch (Exception e) {
             System.out.println("Failed to retrieve games: " + e.getMessage());
         }
     }
-    // handle playing a game
+
+    // Handle playing a game
     public static void playGame() {
         try {
-            List<GameData> games = serverFacade.listGames(currentToken); // Call listGames from ServerFacade
-            if (games.isEmpty()) {
-                System.out.println("No available games to join.");
-                return;
-            }
-            System.out.println("Available Games:");
-            for (int i = 0; i < games.size(); i++) {
-                GameData game = games.get(i);
-                System.out.println((i + 1) + ". " + game.getGameName() + " (White: " + game.getWhiteUsername() + ", Black: " + game.getBlackUsername() + ")");
-            }
-            System.out.print("Enter the number of the game you want to join: ");
-            String input = scanner.nextLine().trim();
+            List<GameData> games = serverFacade.listGames(currentToken);
+            displayGames(games);
 
-            int gameNumber;
-            try {
-                gameNumber = Integer.parseInt(input);
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a valid game number.");
-                return;
-            }
+            System.out.print("Enter the number of the game you want to join: ");
+            int gameNumber = Integer.parseInt(scanner.nextLine().trim());
+
             if (gameNumber < 1 || gameNumber > games.size()) {
                 System.out.println("Invalid game number. Please try again.");
                 return;
             }
+
             GameData selectedGame = games.get(gameNumber - 1);
             System.out.print("Enter the color you want to play (WHITE/BLACK): ");
             String playerColor = scanner.nextLine().trim().toUpperCase();
@@ -227,20 +215,12 @@ public class ChessClient {
             System.out.println("Error: " + e.getMessage());
         }
     }
-    // handle observing a game
+
+    // Handle observing a game
     public static void observeGame() {
         try {
             List<GameData> games = serverFacade.listGames(currentToken);
-            if (games.isEmpty()) {
-                System.out.println("No available games to observe.");
-                return;
-            }
-
-            System.out.println("Available Games:");
-            for (int i = 0; i < games.size(); i++) {
-                GameData game = games.get(i);
-                System.out.println((i + 1) + ". " + game.getGameName() + " (White: " + game.getWhiteUsername() + ", Black: " + game.getBlackUsername() + ")");
-            }
+            displayGames(games);
 
             System.out.print("Enter the number of the game you want to observe: ");
             int gameNumber = Integer.parseInt(scanner.nextLine().trim());
@@ -251,17 +231,12 @@ public class ChessClient {
             }
 
             GameData selectedGame = games.get(gameNumber - 1);
-
             System.out.println("You are observing the game: " + selectedGame.getGameName());
             System.out.println("Displaying an empty chessboard...");
-
             DisplayChessBoard.displayChessBoard();
 
         } catch (Exception e) {
             System.out.println("Error observing game: " + e.getMessage());
         }
     }
-
 }
-
-

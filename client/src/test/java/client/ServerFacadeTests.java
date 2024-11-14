@@ -156,7 +156,7 @@ void testRegisterAndLogin() throws Exception {
 
 
     @Test
-    public void testListGamesSuccess() {
+    public void testListGamesSuccessWithValidToken() {
         ListGamesRequest request = new ListGamesRequest("validToken");
         ListGamesResult result = listGamesService.listGames(request);
         assertTrue(result.isSuccess());
@@ -165,7 +165,7 @@ void testRegisterAndLogin() throws Exception {
     }
 
     @Test
-    public void testListGamesFailureInvalidToken() {
+    public void testListGamesFailure() {
         ListGamesRequest request = new ListGamesRequest("invalidToken");
         ListGamesResult result = listGamesService.listGames(request);
 
