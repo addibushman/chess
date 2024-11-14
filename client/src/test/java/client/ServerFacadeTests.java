@@ -157,20 +157,20 @@ public class ServerFacadeTests {
 
     @Test
     public void testListGamesSuccessWithValidToken() {
-        ListGamesRequest request = new ListGamesRequest("validToken");
-        ListGamesResult result = listGamesService.listGames(request);
-        assertTrue(result.isSuccess());
-        assertEquals(0, result.getGames().size(), "Expected no games in the list initially");
-        assertEquals("Games retrieved successfully", result.getMessage());
+        ListGamesRequest listRequest = new ListGamesRequest("validToken");
+        ListGamesResult listResults = listGamesService.listGames(listRequest);
+        assertTrue(listResults.isSuccess());
+        assertEquals(0, listResults.getGames().size(), "Expected no games in the list initially");
+        assertEquals("Games retrieved successfully", listResults.getMessage());
     }
 
     @Test
     public void testListGamesFailure() {
-        ListGamesRequest request = new ListGamesRequest("invalidToken");
-        ListGamesResult result = listGamesService.listGames(request);
+        ListGamesRequest listRequest = new ListGamesRequest("invalidToken");
+        ListGamesResult listResult = listGamesService.listGames(listRequest);
 
-        assertFalse(result.isSuccess());
-        assertEquals("Error Invalid authToken", result.getMessage());
+        assertFalse(listResult.isSuccess());
+        assertEquals("Error Invalid authToken", listResult.getMessage());
     }
 
     //join game tests next
