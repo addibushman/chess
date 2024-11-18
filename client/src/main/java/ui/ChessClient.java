@@ -217,6 +217,8 @@ public class ChessClient {
                 return;
             }
             DisplayChessBoard.displayChessBoard();
+        } catch (NumberFormatException e) {
+            System.out.println("Error joining game: Must be a number");
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
         }
@@ -240,8 +242,13 @@ public class ChessClient {
             System.out.println("You are observing the game: " + selectedGame.getGameName());
             DisplayChessBoard.displayChessBoard();
 
+        } catch (NumberFormatException e) {
+            System.out.println("Error joining game: Must be a number");
+
         } catch (Exception e) {
             System.out.println("Error observing game: " + e.getMessage());
+
         }
+
     }
 }

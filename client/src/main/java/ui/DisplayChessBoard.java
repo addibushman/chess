@@ -23,9 +23,9 @@ public class DisplayChessBoard {
     }
 
     private static void printBoardWhite(String[][] board) {
-        System.out.print("   ");
+        System.out.print("    ");
         for (char c = 'h'; c >= 'a'; c--) {
-            System.out.print(c + " ");
+            System.out.print(c + "  ");
         }
         System.out.println();
 
@@ -35,27 +35,27 @@ public class DisplayChessBoard {
             for (int j = 0; j < 8; j++) {
                 String square = board[i][j];
                 if ((i + j) % 2 == 0) {
-                    System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY + square +
-                            EscapeSequences.RESET_BG_COLOR + " ");
+                    System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY + " " + square + " " +
+                            EscapeSequences.RESET_BG_COLOR);
                 } else {
-                    System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY + square +
-                            EscapeSequences.RESET_BG_COLOR + " ");
+                    System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY + " " + square + " " +
+                            EscapeSequences.RESET_BG_COLOR);
                 }
             }
             System.out.println("  " + (i + 1));
         }
 
-        System.out.print("   ");
+        System.out.print("    ");
         for (char c = 'h'; c >= 'a'; c--) {
-            System.out.print(c + " ");
+            System.out.print(c + "  ");
         }
         System.out.println();
     }
 
     private static void printBoardBlack(String[][] board) {
-        System.out.print("   ");
+        System.out.print("    ");
         for (char c = 'a'; c <= 'h'; c++) {
-            System.out.print(c + " ");
+            System.out.print(c + "  ");
         }
         System.out.println();
 
@@ -72,20 +72,20 @@ public class DisplayChessBoard {
                 }
 
                 if ((i + j) % 2 == 0) {
-                    System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY + square +
-                            EscapeSequences.RESET_BG_COLOR + " ");
+                    System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY + " " + square + " " +
+                            EscapeSequences.RESET_BG_COLOR);
                 } else {
-                    System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY + square +
-                            EscapeSequences.RESET_BG_COLOR + " ");
+                    System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY + " " + square + " " +
+                            EscapeSequences.RESET_BG_COLOR);
                 }
             }
 
             System.out.println("  " + (8 - i));
         }
 
-        System.out.print("   ");
+        System.out.print("    ");
         for (char c = 'a'; c <= 'h'; c++) {
-            System.out.print(c + " ");
+            System.out.print(c + "  ");
         }
         System.out.println();
     }
