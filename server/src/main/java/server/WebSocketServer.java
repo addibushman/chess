@@ -46,7 +46,7 @@ public class WebSocketServer {
     }
 
     private ChessGame getGameByID(int gameID) {
-        return new ChessGame(); // Returning a dummy game for now
+        return new ChessGame();
     }
 
     private void addSessionToGame(Integer gameID, Session session) {
