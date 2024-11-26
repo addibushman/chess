@@ -2,52 +2,57 @@ package ui;
 
 import javax.websocket.*;
 import java.net.URI;
-import java.util.Scanner;
+import websocket.messages.ServerMessage;
+import com.google.gson.Gson;
 
 public class WebSocketServerFacade extends Endpoint {
 
+    private Session session;
 
-    public void main(String[] args) throws Exception {
+    public static void main(String[] args) throws Exception {
+        WebSocketServerFacade facade = new WebSocketServerFacade();
+        facade.connect();
+    }
+
+    public void connect() throws Exception {
         URI uri = new URI("ws://localhost:8080/ws");
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
         this.session = container.connectToServer(this, uri);
-
         this.session.addMessageHandler(new MessageHandler.Whole<String>() {
+            @Override
             public void onMessage(String message) {
-                System.out.println(message);
+                System.out.println("Received from server: " + message);
+                handleServerMessage(message);
             }
         });
-        Scanner scanner = new Scanner(System.in);
 
-        System.out.println("Enter a message you want to echo");
-        while (true) {
-            send.send(scanner.nextLine());
+        System.out.println("Connected to the WebSocket server.");
+    }
+
+    private void handleServerMessage(String message) {
+        Gson gson = new Gson();
+        ServerMessage serverMessage = gson.fromJson(message, ServerMessage.class);
+
+        if (serverMessage != null) {
+            if (serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION) {
+                System.out.println("Successfully connected to the game.");
+            }
         }
-
-
-    }
-    public void send(String msg) throws Exception {
-        this.session.getBasicRemote().sendText(msg);
     }
 
-    public Session session;
 
-//    public WSClient() throws Exception {
-//        URI uri = new URI("ws://localhost:8080/ws");
-//        WebSocketContainer container = ContainerProvider.getWebSocketContainer();
-//        this.session = container.connectToServer(this, uri);
-//
-//        this.session.addMessageHandler(new MessageHandler.Whole<String>() {
-//            public void onMessage(String message) {
-//                System.out.println(message);
-//            }
-//        });
-    }
-
-//    public void send(String msg) throws Exception {
-//        this.session.getBasicRemote().sendText(msg);
-//    }
-
+    @Override
     public void onOpen(Session session, EndpointConfig endpointConfig) {
+        System.out.println("WebSocket connection opened.");
+    }
+
+    @OnClose
+    public void onClose(Session session, CloseReason closeReason) {
+        System.out.println("WebSocket connection closed: " + closeReason.getReasonPhrase());
+    }
+
+    @OnError
+    public void onError(Session session, Throwable throwable) {
+        System.out.println("WebSocket error occurred: " + throwable.getMessage());
     }
 }
