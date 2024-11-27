@@ -2,8 +2,10 @@ package server;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
+import model.GameData;
 import org.eclipse.jetty.websocket.api.*;
 import org.eclipse.jetty.websocket.api.annotations.*;
+import service.DaoService;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
@@ -23,30 +25,36 @@ public class WebSocketServer {
 
         if (command != null) {
             if (command.getCommandType() == UserGameCommand.CommandType.CONNECT) {
-                // Log connection and add session to the game
                 System.out.println("Client " + session.getRemoteAddress() + " connected to the game.");
                 addSessionToGame(command.getGameID(), session);
 
-                ChessGame game = getGameByID(command.getGameID());
+                GameData game = getGameByID(command.getGameID());
 
-                // Create the LOAD_GAME message to send back to the client
-                ServerMessage serverMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, game);
+                if (game == null) {
+                    // Send error message if the game ID is invalid
+                    sendMessage(session, new ServerMessage.ErrorMessage("Invalid Game ID"));
+                    return; // Return early if game is not found
+                }
+
+                ServerMessage serverMessage = new ServerMessage.LoadGameMessage(game);
                 sendMessage(session, serverMessage);
 
-                // Create the NOTIFICATION message to send to other clients (excluding the root user)
-                ServerMessage notificationServerMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, "Player has connected: " + session.getRemoteAddress());
-
-                // Send notification to everyone else in the game except the root user
+                ServerMessage notificationServerMessage = new ServerMessage.NotificationMessage("Player has connected: " + session.getRemoteAddress());
                 sendMessageToOthers(command.getGameID(), session, notificationServerMessage);
             }
         } else {
             System.out.println("Invalid command received: " + message);
-            sendMessage(session, new ServerMessage(ServerMessage.ServerMessageType.ERROR));
+            sendMessage(session, new ServerMessage.ErrorMessage("Invalid command"));
         }
     }
 
-    private ChessGame getGameByID(int gameID) {
-        return new ChessGame();
+    private GameData getGameByID(int gameID) {
+        try {
+            return DaoService.getInstance().getGameDAO().getGameByID(String.valueOf(gameID));  // Ensure gameID is String
+        } catch (Exception e) {
+            System.out.println("Error retrieving game: " + e.getMessage());
+        }
+        return null;
     }
 
     private void addSessionToGame(Integer gameID, Session session) {
@@ -55,29 +63,17 @@ public class WebSocketServer {
         System.out.println("Session added to game " + gameID);
     }
 
-    private void removeSessionFromGame(Session session) {
-        gameSessions.forEach((gameID, sessions) -> {
-            sessions.remove(session);
-            if (sessions.isEmpty()) {
-                gameSessions.remove(gameID);
-            }
-        });
-        System.out.println("Session removed from all games");
-    }
-
-    // Method to send a message to a session
     private void sendMessage(Session session, ServerMessage message) throws Exception {
         String jsonMessage = gson.toJson(message);
         session.getRemote().sendString(jsonMessage);
         System.out.println("Sent message to client: " + jsonMessage);
     }
 
-    // New method to send a message to everyone in the game except the root user (the session)
     private void sendMessageToOthers(Integer gameID, Session rootSession, ServerMessage message) throws Exception {
         Set<Session> sessions = gameSessions.get(gameID);
         if (sessions != null) {
             for (Session s : sessions) {
-                if (!s.equals(rootSession)) { // Do not send message to the root session
+                if (!s.equals(rootSession)) {
                     s.getRemote().sendString(gson.toJson(message));
                     System.out.println("Sent notification to other client in game " + gameID + ": " + gson.toJson(message));
                 }

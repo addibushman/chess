@@ -1,13 +1,13 @@
 package websocket.messages;
 
-import chess.ChessGame;
+import model.GameData;
 import java.util.Objects;
 
 public class ServerMessage {
     ServerMessageType serverMessageType;
-
-    String message;
-    ChessGame game;
+    GameData game;
+    String errorMessage;  // Error message field (used for errors)
+    String message;  // General message (used for notifications)
 
     public enum ServerMessageType {
         LOAD_GAME,
@@ -19,7 +19,7 @@ public class ServerMessage {
         this.serverMessageType = type;
     }
 
-    public ServerMessage(ServerMessageType type, ChessGame game) {
+    public ServerMessage(ServerMessageType type, GameData game) {
         this.serverMessageType = type;
         this.game = game;
     }
@@ -27,6 +27,15 @@ public class ServerMessage {
     public ServerMessage(ServerMessageType type, String message) {
         this.serverMessageType = type;
         this.message = message;
+    }
+
+    public ServerMessage(ServerMessageType type, String errorMessage, boolean isError) {
+        this.serverMessageType = type;
+        if (isError) {
+            this.errorMessage = errorMessage;  // For error, use errorMessage
+        } else {
+            this.message = errorMessage;  // For notifications, use message
+        }
     }
 
     public ServerMessageType getServerMessageType() {
@@ -37,8 +46,12 @@ public class ServerMessage {
         return message;
     }
 
-    public ChessGame getGame() {
+    public GameData getGame() {
         return this.game;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;  // Return the error message
     }
 
     @Override
@@ -55,30 +68,31 @@ public class ServerMessage {
     }
 
     // Subclasses for specific message types
-
     public static class LoadGameMessage extends ServerMessage {
-        public LoadGameMessage(ChessGame game) {
-            super(ServerMessageType.LOAD_GAME, game);
+        public LoadGameMessage(GameData gameData) {
+            super(ServerMessageType.LOAD_GAME, gameData);
         }
 
-        public ChessGame getGame() {
+        public GameData getGame() {
             return this.game;
         }
     }
 
+    // Update the ErrorMessage class to use errorMessage field
     public static class ErrorMessage extends ServerMessage {
         public ErrorMessage(String errorMessage) {
-            super(ServerMessageType.ERROR, errorMessage);
+            super(ServerMessageType.ERROR, errorMessage, true); // Pass true for errors
         }
 
         public String getErrorMessage() {
-            return this.message;
+            return this.errorMessage; // Get the error message
         }
     }
 
+    // Update the NotificationMessage class to use message field
     public static class NotificationMessage extends ServerMessage {
         public NotificationMessage(String message) {
-            super(ServerMessageType.NOTIFICATION, message);
+            super(ServerMessageType.NOTIFICATION, message); // Use message for notifications
         }
 
         public String getNotificationMessage() {
