@@ -8,8 +8,13 @@ import org.eclipse.jetty.websocket.api.annotations.*;
 import service.DaoService;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
+import model.AuthToken;
+import dataaccess.DataAccessException;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 @WebSocket
 public class WebSocketServer {
@@ -24,16 +29,31 @@ public class WebSocketServer {
         UserGameCommand command = parseCommand(message);
 
         if (command != null) {
+            // Check for valid authToken
+            AuthToken authToken = null;
+            try {
+                authToken = DaoService.getInstance().getAuthDAO().getAuthToken(command.getAuthToken());
+                if (authToken == null) {
+                    // Send error message if the auth token is invalid
+                    sendMessage(session, new ServerMessage.ErrorMessage("Invalid AuthToken"));
+                    return; // Don't proceed further if the authToken is invalid
+                }
+            } catch (DataAccessException e) {
+                System.out.println("Error verifying auth token: " + e.getMessage());
+                sendMessage(session, new ServerMessage.ErrorMessage("Error verifying auth token"));
+                return;
+            }
+
             if (command.getCommandType() == UserGameCommand.CommandType.CONNECT) {
+                // Log connection and add session to the game
                 System.out.println("Client " + session.getRemoteAddress() + " connected to the game.");
                 addSessionToGame(command.getGameID(), session);
 
+                // Check for valid gameID
                 GameData game = getGameByID(command.getGameID());
-
                 if (game == null) {
-                    // Send error message if the game ID is invalid
                     sendMessage(session, new ServerMessage.ErrorMessage("Invalid Game ID"));
-                    return; // Return early if game is not found
+                    return; // Return early if game not found
                 }
 
                 ServerMessage serverMessage = new ServerMessage.LoadGameMessage(game);
@@ -50,7 +70,7 @@ public class WebSocketServer {
 
     private GameData getGameByID(int gameID) {
         try {
-            return DaoService.getInstance().getGameDAO().getGameByID(String.valueOf(gameID));  // Ensure gameID is String
+            return DaoService.getInstance().getGameDAO().getGameByID(String.valueOf(gameID)); // Ensure gameID is String
         } catch (Exception e) {
             System.out.println("Error retrieving game: " + e.getMessage());
         }
