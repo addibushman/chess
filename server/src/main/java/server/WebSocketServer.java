@@ -1,6 +1,7 @@
 package server;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import com.google.gson.Gson;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.*;
@@ -44,6 +45,7 @@ public class WebSocketServer {
                 return;
             }
 
+            // Handle CONNECT command
             if (command.getCommandType() == UserGameCommand.CommandType.CONNECT) {
                 // Log connection and add session to the game
                 System.out.println("Client " + session.getRemoteAddress() + " connected to the game.");
@@ -62,9 +64,62 @@ public class WebSocketServer {
                 ServerMessage notificationServerMessage = new ServerMessage.NotificationMessage("Player has connected: " + session.getRemoteAddress());
                 sendMessageToOthers(command.getGameID(), session, notificationServerMessage);
             }
+
+            // Handle MAKE_MOVE command
+            else if (command.getCommandType() == UserGameCommand.CommandType.MAKE_MOVE) {
+                // Handle the move
+                ChessMove move = command.getMove();
+                GameData game = getGameByID(command.getGameID());
+
+                // Validate the move and game
+                if (game == null) {
+                    sendMessage(session, new ServerMessage.ErrorMessage("Invalid Game ID"));
+                    return;
+                }
+
+                boolean isValidMove = validateMove(game, move);
+                if (!isValidMove) {
+                    sendMessage(session, new ServerMessage.ErrorMessage("Invalid Move"));
+                    return;
+                }
+
+                // Update the game with the move
+                updateGameState(game, move);
+
+                // Send updated game state to all clients
+                ServerMessage loadGameMessage = new ServerMessage.LoadGameMessage(game);
+                sendMessageToAll(command.getGameID(), loadGameMessage);
+
+                // Send notification to all other clients about the move
+                String notificationMessage = "Move made by: " + session.getRemoteAddress();
+                sendMessageToOthers(command.getGameID(), session, new ServerMessage.NotificationMessage(notificationMessage));
+            }
+
         } else {
             System.out.println("Invalid command received: " + message);
             sendMessage(session, new ServerMessage.ErrorMessage("Invalid command"));
+        }
+    }
+
+    private boolean validateMove(GameData game, ChessMove move) {
+        // Add move validation logic here. For example, checking if the move follows chess rules.
+        // For now, this is just a placeholder returning true.
+        return true;
+    }
+
+    private void updateGameState(GameData game, ChessMove move) {
+        // Update the game with the new move. This could involve updating the board, checking for checkmate, etc.
+        System.out.println("Move made: " + move);
+        // Example: update the game object with the move (you may need to add more logic here).
+    }
+
+    private void sendMessageToAll(Integer gameID, ServerMessage message) throws Exception {
+        Set<Session> sessions = gameSessions.get(gameID);
+        if (sessions != null) {
+            for (Session s : sessions) {
+                s.getRemote().sendString(gson.toJson(message));
+                System.out.println("Sent message to all clients in game " + gameID + ": " + gson.toJson(message));
+            }
         }
     }
 
