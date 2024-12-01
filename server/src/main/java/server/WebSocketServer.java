@@ -73,10 +73,9 @@ public class WebSocketServer {
                     return;
                 }
 
-                boolean isValidMove = validateMove(game, move);
+                boolean isValidMove = validateMove(game, move, session);
                 if (!isValidMove) {
-                    sendMessage(session, new ServerMessage.ErrorMessage("Invalid Move"));
-                    return;
+                    return; // Invalid move (Error message will already be sent by validateMove)
                 }
 
                 // Update the game with the move
@@ -90,45 +89,61 @@ public class WebSocketServer {
                 String notificationMessage = "Move made by: " + session.getRemoteAddress();
                 sendMessageToOthers(command.getGameID(), session, new ServerMessage.NotificationMessage(notificationMessage));
             }
-
         } else {
             System.out.println("Invalid command received: " + message);
             sendMessage(session, new ServerMessage.ErrorMessage("Invalid command"));
         }
     }
 
-    private boolean validateMove(GameData game, ChessMove move) {
-        // Assuming we have a method to get the ChessGame instance from the game ID
-        ChessGame chessGame = getGameInstanceById(game.getGameID());  // Retrieve the ChessGame instance
+    private boolean validateMove(GameData game, ChessMove move, Session session) {
+        try {
+            // Retrieve the game instance and the current turn
+            ChessGame chessGame = getGameInstanceById(game.getGameID());
 
-        if (chessGame == null) {
-            return false;  // Invalid game ID
-        }
-
-        ChessBoard board = chessGame.getBoard();  // Get the current board state
-        ChessPiece piece = board.getPiece(move.getStartPosition());  // Get the piece at the starting position
-
-        if (piece == null) {
-            return false;  // No piece at the start position
-        }
-
-        // Check if the move is valid for the piece type
-        Collection<ChessMove> validMoves = piece.pieceMoves(board, move.getStartPosition());
-        if (!validMoves.contains(move)) {
-            return false;  // The move is not valid for this piece
-        }
-
-        // Check for blocked rook move (if the piece is a rook)
-        if (piece.getPieceType() == ChessPiece.PieceType.ROOK) {
-            if (isRookBlocked(board, move)) {
-                return false;  // Rook is blocked by another piece
+            if (chessGame == null) {
+                sendMessage(session, new ServerMessage.ErrorMessage("Invalid Game ID"));
+                return false;
             }
+
+            // Get the current player's color (whose turn it is)
+            ChessGame.TeamColor currentPlayerColor = chessGame.getTeamTurn(); // Assuming this method returns the current player's color
+
+            // Get the piece to move
+            ChessPiece piece = chessGame.getBoard().getPiece(move.getStartPosition());
+            if (piece == null) {
+                sendMessage(session, new ServerMessage.ErrorMessage("No piece at start position"));
+                return false;  // No piece at the start position
+            }
+
+            // Check if the current player is trying to move out of turn
+            if (piece.getTeamColor() != currentPlayerColor) {
+                sendMessage(session, new ServerMessage.ErrorMessage("It's not your turn"));
+                return false; // The player is trying to make a move out of turn
+            }
+
+            // Check if the move is valid for the piece
+            Collection<ChessMove> validMoves = piece.pieceMoves(chessGame.getBoard(), move.getStartPosition());
+            if (!validMoves.contains(move)) {
+                sendMessage(session, new ServerMessage.ErrorMessage("Invalid Move"));
+                return false;  // The move is not valid for this piece
+            }
+
+            // Check if the rook's path is blocked (if the piece is a rook)
+            if (piece.getPieceType() == ChessPiece.PieceType.ROOK) {
+                if (isRookBlocked(chessGame.getBoard(), move)) {
+                    sendMessage(session, new ServerMessage.ErrorMessage("Rook path is blocked"));
+                    return false; // Rook's path is blocked
+                }
+            }
+
+            return true; // All checks passed, the move is valid
+        } catch (Exception e) {
+            // Handle the exception (e.g., log it or rethrow it)
+            System.out.println("Error in validateMove: " + e.getMessage());
+            return false; // Return false to indicate that the move is not valid
         }
-
-        // Add any other move-specific validation checks here
-
-        return true;  // Valid move
     }
+
 
     private ChessGame getGameInstanceById(String gameID) {
         try {
