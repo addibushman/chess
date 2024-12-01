@@ -1,7 +1,6 @@
 package server;
 
-import chess.ChessGame;
-import chess.ChessMove;
+import chess.*;
 import com.google.gson.Gson;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.*;
@@ -12,10 +11,7 @@ import websocket.messages.ServerMessage;
 import model.AuthToken;
 import dataaccess.DataAccessException;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @WebSocket
 public class WebSocketServer {
@@ -102,10 +98,90 @@ public class WebSocketServer {
     }
 
     private boolean validateMove(GameData game, ChessMove move) {
-        // Add move validation logic here. For example, checking if the move follows chess rules.
-        // For now, this is just a placeholder returning true.
-        return true;
+        // Assuming we have a method to get the ChessGame instance from the game ID
+        ChessGame chessGame = getGameInstanceById(game.getGameID());  // Retrieve the ChessGame instance
+
+        if (chessGame == null) {
+            return false;  // Invalid game ID
+        }
+
+        ChessBoard board = chessGame.getBoard();  // Get the current board state
+        ChessPiece piece = board.getPiece(move.getStartPosition());  // Get the piece at the starting position
+
+        if (piece == null) {
+            return false;  // No piece at the start position
+        }
+
+        // Check if the move is valid for the piece type
+        Collection<ChessMove> validMoves = piece.pieceMoves(board, move.getStartPosition());
+        if (!validMoves.contains(move)) {
+            return false;  // The move is not valid for this piece
+        }
+
+        // Check for blocked rook move (if the piece is a rook)
+        if (piece.getPieceType() == ChessPiece.PieceType.ROOK) {
+            if (isRookBlocked(board, move)) {
+                return false;  // Rook is blocked by another piece
+            }
+        }
+
+        // Add any other move-specific validation checks here
+
+        return true;  // Valid move
     }
+
+    private ChessGame getGameInstanceById(String gameID) {
+        try {
+            // Assuming DaoService can give you the game data from the database or in-memory storage
+            GameData gameData = DaoService.getInstance().getGameDAO().getGameByID(gameID);  // Fetch game data
+            if (gameData != null) {
+                ChessGame chessGame = new ChessGame();  // Create a new ChessGame instance
+                // Populate the chessGame instance using gameData (you can customize this part as needed)
+                // For example, initialize the board based on gameData or other logic
+                return chessGame;  // Return the game instance
+            }
+        } catch (Exception e) {
+            System.out.println("Error retrieving game: " + e.getMessage());
+        }
+        return null;  // Return null if no game was found
+    }
+
+
+
+    // Helper method to check if the rook's path is blocked
+    private boolean isRookBlocked(ChessBoard board, ChessMove move) {
+        ChessPosition start = move.getStartPosition();
+        ChessPosition end = move.getEndPosition();
+
+        int row = start.getRow() - 1;  // Adjust for 0-indexed array
+        int col = start.getColumn() - 1;
+
+        int deltaRow = Integer.compare(end.getRow(), start.getRow());  // -1 for up, 1 for down, 0 if horizontal move
+        int deltaCol = Integer.compare(end.getColumn(), start.getColumn());  // -1 for left, 1 for right, 0 if vertical move
+
+        // Check if the rook is moving horizontally
+        if (deltaRow == 0) {
+            // Move left or right
+            for (int i = col + deltaCol; i != end.getColumn() - 1; i += deltaCol) {
+                if (board.getPiece(new ChessPosition(row + 1, i + 1)) != null) {
+                    return true;  // A piece is blocking the path
+                }
+            }
+        }
+        // Check if the rook is moving vertically
+        else if (deltaCol == 0) {
+            // Move up or down
+            for (int i = row + deltaRow; i != end.getRow() - 1; i += deltaRow) {
+                if (board.getPiece(new ChessPosition(i + 1, col + 1)) != null) {
+                    return true;  // A piece is blocking the path
+                }
+            }
+        }
+
+        return false;  // No blockage found
+    }
+
+
 
     private void updateGameState(GameData game, ChessMove move) {
         // Update the game with the new move. This could involve updating the board, checking for checkmate, etc.
