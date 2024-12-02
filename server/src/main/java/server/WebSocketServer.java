@@ -26,14 +26,12 @@ public class WebSocketServer {
         UserGameCommand command = parseCommand(message);
 
         if (command != null) {
-            // Check for valid authToken
             AuthToken authToken = null;
             try {
                 authToken = DaoService.getInstance().getAuthDAO().getAuthToken(command.getAuthToken());
                 if (authToken == null) {
-                    // Send error message if the auth token is invalid
                     sendMessage(session, new ServerMessage.ErrorMessage("Invalid AuthToken"));
-                    return; // Don't proceed further if the authToken is invalid
+                    return;
                 }
             } catch (DataAccessException e) {
                 System.out.println("Error verifying auth token: " + e.getMessage());
@@ -41,17 +39,14 @@ public class WebSocketServer {
                 return;
             }
 
-            // Handle CONNECT command
             if (command.getCommandType() == UserGameCommand.CommandType.CONNECT) {
-                // Log connection and add session to the game
                 System.out.println("Client " + session.getRemoteAddress() + " connected to the game.");
                 addSessionToGame(command.getGameID(), session);
 
-                // Check for valid gameID
                 GameData game = getGameByID(command.getGameID());
                 if (game == null) {
                     sendMessage(session, new ServerMessage.ErrorMessage("Invalid Game ID"));
-                    return; // Return early if game not found
+                    return;
                 }
 
                 ServerMessage serverMessage = new ServerMessage.LoadGameMessage(game);
@@ -61,13 +56,10 @@ public class WebSocketServer {
                 sendMessageToOthers(command.getGameID(), session, notificationServerMessage);
             }
 
-            // Handle MAKE_MOVE command
             else if (command.getCommandType() == UserGameCommand.CommandType.MAKE_MOVE) {
-                // Handle the move
                 ChessMove move = command.getMove();
                 GameData game = getGameByID(command.getGameID());
 
-                // Validate the move and game
                 if (game == null) {
                     sendMessage(session, new ServerMessage.ErrorMessage("Invalid Game ID"));
                     return;
@@ -75,17 +67,14 @@ public class WebSocketServer {
 
                 boolean isValidMove = validateMove(game, move, session);
                 if (!isValidMove) {
-                    return; // Invalid move (Error message will already be sent by validateMove)
+                    return;
                 }
 
-                // Update the game with the move
                 updateGameState(game, move);
 
-                // Send updated game state to all clients
                 ServerMessage loadGameMessage = new ServerMessage.LoadGameMessage(game);
                 sendMessageToAll(command.getGameID(), loadGameMessage);
 
-                // Send notification to all other clients about the move
                 String notificationMessage = "Move made by: " + session.getRemoteAddress();
                 sendMessageToOthers(command.getGameID(), session, new ServerMessage.NotificationMessage(notificationMessage));
             }
@@ -97,111 +86,102 @@ public class WebSocketServer {
 
     private boolean validateMove(GameData game, ChessMove move, Session session) {
         try {
-            // Retrieve the game instance and the current turn
-            ChessGame chessGame = getGameInstanceById(game.getGameID());
+            System.out.println("Validating move for game: " + game.getGameID() + " with move: " + move.toString());
 
+            ChessGame chessGame = getGameInstanceById(game.getGameID());
             if (chessGame == null) {
+                System.out.println("Error: No game found with the given gameID.");
                 sendMessage(session, new ServerMessage.ErrorMessage("Invalid Game ID"));
                 return false;
             }
 
-            // Get the current player's color (whose turn it is)
-            ChessGame.TeamColor currentPlayerColor = chessGame.getTeamTurn(); // Assuming this method returns the current player's color
+            ChessGame.TeamColor currentPlayerColor = chessGame.getTeamTurn();
+            System.out.println("Current player color: " + currentPlayerColor);
 
-            // Get the piece to move
             ChessPiece piece = chessGame.getBoard().getPiece(move.getStartPosition());
             if (piece == null) {
+                System.out.println("Error: No piece at the start position.");
                 sendMessage(session, new ServerMessage.ErrorMessage("No piece at start position"));
-                return false;  // No piece at the start position
+                return false;
             }
 
-            // Check if the current player is trying to move out of turn
             if (piece.getTeamColor() != currentPlayerColor) {
-                sendMessage(session, new ServerMessage.ErrorMessage("It's not your turn"));
-                return false; // The player is trying to make a move out of turn
+                System.out.println("Error: Player is trying to move the opponent's piece or it's not their turn.");
+                sendMessage(session, new ServerMessage.ErrorMessage("It's not your turn or you cannot move your opponent's piece"));
+                return false;
             }
 
-            // Check if the move is valid for the piece
             Collection<ChessMove> validMoves = piece.pieceMoves(chessGame.getBoard(), move.getStartPosition());
             if (!validMoves.contains(move)) {
+                System.out.println("Error: Invalid move for this piece.");
                 sendMessage(session, new ServerMessage.ErrorMessage("Invalid Move"));
-                return false;  // The move is not valid for this piece
+                return false;
             }
 
-            // Check if the rook's path is blocked (if the piece is a rook)
             if (piece.getPieceType() == ChessPiece.PieceType.ROOK) {
                 if (isRookBlocked(chessGame.getBoard(), move)) {
+                    System.out.println("Error: Rook path is blocked.");
                     sendMessage(session, new ServerMessage.ErrorMessage("Rook path is blocked"));
-                    return false; // Rook's path is blocked
+                    return false;
                 }
             }
 
-            return true; // All checks passed, the move is valid
+            System.out.println("Move validation passed.");
+            return true;
         } catch (Exception e) {
-            // Handle the exception (e.g., log it or rethrow it)
             System.out.println("Error in validateMove: " + e.getMessage());
-            return false; // Return false to indicate that the move is not valid
+            return false;
         }
     }
 
 
     private ChessGame getGameInstanceById(String gameID) {
         try {
-            // Assuming DaoService can give you the game data from the database or in-memory storage
             GameData gameData = DaoService.getInstance().getGameDAO().getGameByID(gameID);  // Fetch game data
             if (gameData != null) {
-                ChessGame chessGame = new ChessGame();  // Create a new ChessGame instance
-                // Populate the chessGame instance using gameData (you can customize this part as needed)
-                // For example, initialize the board based on gameData or other logic
-                return chessGame;  // Return the game instance
+                ChessGame chessGame = new ChessGame();
+                return chessGame;
             }
         } catch (Exception e) {
             System.out.println("Error retrieving game: " + e.getMessage());
         }
-        return null;  // Return null if no game was found
+        return null;
     }
 
 
 
-    // Helper method to check if the rook's path is blocked
     private boolean isRookBlocked(ChessBoard board, ChessMove move) {
         ChessPosition start = move.getStartPosition();
         ChessPosition end = move.getEndPosition();
 
-        int row = start.getRow() - 1;  // Adjust for 0-indexed array
+        int row = start.getRow() - 1;
         int col = start.getColumn() - 1;
 
-        int deltaRow = Integer.compare(end.getRow(), start.getRow());  // -1 for up, 1 for down, 0 if horizontal move
-        int deltaCol = Integer.compare(end.getColumn(), start.getColumn());  // -1 for left, 1 for right, 0 if vertical move
+        int deltaRow = Integer.compare(end.getRow(), start.getRow());
+        int deltaCol = Integer.compare(end.getColumn(), start.getColumn());
 
-        // Check if the rook is moving horizontally
         if (deltaRow == 0) {
-            // Move left or right
             for (int i = col + deltaCol; i != end.getColumn() - 1; i += deltaCol) {
                 if (board.getPiece(new ChessPosition(row + 1, i + 1)) != null) {
-                    return true;  // A piece is blocking the path
+                    return true;
                 }
             }
         }
-        // Check if the rook is moving vertically
         else if (deltaCol == 0) {
-            // Move up or down
             for (int i = row + deltaRow; i != end.getRow() - 1; i += deltaRow) {
                 if (board.getPiece(new ChessPosition(i + 1, col + 1)) != null) {
-                    return true;  // A piece is blocking the path
+                    return true;
                 }
             }
         }
 
-        return false;  // No blockage found
+        return false;
     }
 
 
 
     private void updateGameState(GameData game, ChessMove move) {
-        // Update the game with the new move. This could involve updating the board, checking for checkmate, etc.
         System.out.println("Move made: " + move);
-        // Example: update the game object with the move (you may need to add more logic here).
     }
 
     private void sendMessageToAll(Integer gameID, ServerMessage message) throws Exception {
