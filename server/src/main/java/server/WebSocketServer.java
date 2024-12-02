@@ -2,6 +2,8 @@ package server;
 
 import chess.*;
 import com.google.gson.Gson;
+import dataaccess.MySQLAuthTokenDAO;
+import model.AuthData;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.*;
 import org.eclipse.jetty.websocket.api.annotations.*;
@@ -65,7 +67,7 @@ public class WebSocketServer {
                     return;
                 }
 
-                boolean isValidMove = validateMove(game, move, session);
+                boolean isValidMove = validateMove(game, move, session, command.getAuthToken());
                 if (!isValidMove) {
                     return;
                 }
@@ -84,7 +86,14 @@ public class WebSocketServer {
         }
     }
 
-    private boolean validateMove(GameData game, ChessMove move, Session session) {
+    //black is attempting to control white or reverse, add in a check to see if the move
+    // that's wanting to be made is the same color as the turn
+
+    //need to make sure person who is calling make move, is the person who is authorized to do it
+
+    //make sure username associated with auth token is the same as the person who is making the move
+
+    private boolean validateMove(GameData game, ChessMove move, Session session, String authToken) {
         try {
             System.out.println("Validating move for game: " + game.getGameID() + " with move: " + move.toString());
 
@@ -95,9 +104,30 @@ public class WebSocketServer {
                 return false;
             }
 
+            // Get the current player's color (whoever turn it is)
             ChessGame.TeamColor currentPlayerColor = chessGame.getTeamTurn();
             System.out.println("Current player color: " + currentPlayerColor);
 
+            // Get the player's username
+            String username = getUsernameFromAuthToken(authToken);
+            if (username == null) {
+                System.out.println("Error: Invalid or missing username.");
+                sendMessage(session, new ServerMessage.ErrorMessage("Invalid username"));
+                return false;
+            }
+
+            // Verify if the current player has the correct color based on their username (this should work)
+            if (currentPlayerColor == ChessGame.TeamColor.WHITE && !username.equals(game.getWhiteUsername())) {
+                System.out.println("Error: It's White's turn, but the player is not White.");
+                sendMessage(session, new ServerMessage.ErrorMessage("It's White's turn"));
+                return false;
+            } else if (currentPlayerColor == ChessGame.TeamColor.BLACK && !username.equals(game.getBlackUsername())) {
+                System.out.println("Error: It's Black's turn, but the player is not Black.");
+                sendMessage(session, new ServerMessage.ErrorMessage("It's Black's turn"));
+                return false;
+            }
+
+            // move piece
             ChessPiece piece = chessGame.getBoard().getPiece(move.getStartPosition());
             if (piece == null) {
                 System.out.println("Error: No piece at the start position.");
@@ -105,12 +135,14 @@ public class WebSocketServer {
                 return false;
             }
 
+            // Check if the piece's color matches the player's turn
             if (piece.getTeamColor() != currentPlayerColor) {
                 System.out.println("Error: Player is trying to move the opponent's piece or it's not their turn.");
                 sendMessage(session, new ServerMessage.ErrorMessage("It's not your turn or you cannot move your opponent's piece"));
                 return false;
             }
 
+            // Check if the move is valid for the piece
             Collection<ChessMove> validMoves = piece.pieceMoves(chessGame.getBoard(), move.getStartPosition());
             if (!validMoves.contains(move)) {
                 System.out.println("Error: Invalid move for this piece.");
@@ -131,6 +163,20 @@ public class WebSocketServer {
         } catch (Exception e) {
             System.out.println("Error in validateMove: " + e.getMessage());
             return false;
+        }
+    }
+
+    private String getUsernameFromAuthToken(String authTokenString) throws DataAccessException {
+        //returning null, not working. I should be able to use a class I already have
+        //AuthToken token = AuthData.getInstance().getAuthToken(authTokenString);
+        MySQLAuthTokenDAO authTokenDAO = DaoService.getInstance().getAuthDAO();
+
+        AuthToken token = authTokenDAO.getAuthToken(authTokenString);
+        if (token != null) {
+            return token.getUsername();
+        } else {
+            System.out.println("No username found for this auth token: " + authTokenString);
+            return null;
         }
     }
 
@@ -196,7 +242,7 @@ public class WebSocketServer {
 
     private GameData getGameByID(int gameID) {
         try {
-            return DaoService.getInstance().getGameDAO().getGameByID(String.valueOf(gameID)); // Ensure gameID is String
+            return DaoService.getInstance().getGameDAO().getGameByID(String.valueOf(gameID));
         } catch (Exception e) {
             System.out.println("Error retrieving game: " + e.getMessage());
         }
