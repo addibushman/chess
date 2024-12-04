@@ -7,11 +7,15 @@ import java.util.Objects;
 public class ChessGame {
     private ChessBoard board;
     private TeamColor teamTurn;
+    private boolean whiteHasResigned;
+    private boolean blackHasResigned;
 
     public ChessGame() {
         this.board = new ChessBoard();
         this.board.resetBoard();
         this.teamTurn = TeamColor.WHITE;
+        this.whiteHasResigned = false;  // Initially no one has resigned
+        this.blackHasResigned = false;
     }
 
     public TeamColor getTeamTurn() {
@@ -25,6 +29,22 @@ public class ChessGame {
     public enum TeamColor {
         WHITE,
         BLACK
+    }
+
+    public boolean getWhiteResigned() {
+        return whiteHasResigned;
+    }
+
+    public void setWhiteResigned(boolean hasResigned) {
+        this.whiteHasResigned = hasResigned;
+    }
+
+    public boolean getBlackResigned() {
+        return blackHasResigned;
+    }
+
+    public void setBlackResigned(boolean hasResigned) {
+        this.blackHasResigned = hasResigned;
     }
 
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {

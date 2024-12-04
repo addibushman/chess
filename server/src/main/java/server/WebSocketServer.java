@@ -58,6 +58,27 @@ public class WebSocketServer {
                 sendMessageToOthers(command.getGameID(), session, notificationServerMessage);
             }
 
+            else if (command.getCommandType() == UserGameCommand.CommandType.RESIGN) {
+                GameData game = getGameByID(command.getGameID());
+                if (game == null) {
+                    sendMessage(session, new ServerMessage.ErrorMessage("Invalid Game ID"));
+                    return;
+                }
+
+                String username = getUsernameFromAuthToken(command.getAuthToken());
+                if (username == null) {
+                    sendMessage(session, new ServerMessage.ErrorMessage("Invalid username"));
+                    return;
+                }
+
+                boolean resignSuccess = processResignation(game, username, session);
+                if (resignSuccess) {
+                    sendMessageToAll(command.getGameID(), new ServerMessage.NotificationMessage(username + " has resigned. Game Over."));
+                } else {
+                    sendMessage(session, new ServerMessage.ErrorMessage("Only a player can resign."));
+                }
+            }
+
             else if (command.getCommandType() == UserGameCommand.CommandType.MAKE_MOVE) {
                 ChessMove move = command.getMove();
                 GameData game = getGameByID(command.getGameID());
@@ -79,6 +100,7 @@ public class WebSocketServer {
             sendMessage(session, new ServerMessage.ErrorMessage("Invalid command"));
         }
     }
+
 
     private boolean validateMove(GameData game, ChessMove move, Session session, String authToken) {
         try {
@@ -156,6 +178,11 @@ public class WebSocketServer {
                 return false;
             }
 
+            boolean hasResigned = chessGame.getWhiteResigned() || chessGame.getBlackResigned();
+            if (hasResigned) {
+                return true;
+            }
+
             ChessGame.TeamColor currentPlayerColor = chessGame.getTeamTurn();
             boolean isCheckmate = chessGame.isInCheckmate(currentPlayerColor);
             boolean isStalemate = chessGame.isInStalemate(currentPlayerColor);
@@ -171,7 +198,6 @@ public class WebSocketServer {
             }
 
             return false;
-
         } catch (Exception e) {
             System.out.println("Error in isGameOver: " + e.getMessage());
             return false;
@@ -294,6 +320,38 @@ public class WebSocketServer {
             System.out.println("Error updating game state: " + e.getMessage());
         }
     }
+
+    private boolean processResignation(GameData game, String username, Session session) {
+        try {
+            ChessGame chessGame = getGameInstanceById(game.getGameID());
+            if (chessGame == null) {
+                System.out.println("Error: No game found with the given gameID.");
+                return false;
+            }
+
+            if (!(username.equals(game.getWhiteUsername()) || username.equals(game.getBlackUsername()))) {
+                System.out.println("Error: Only players can resign.");
+                sendMessage(session, new ServerMessage.ErrorMessage("Only a player can resign"));
+                return false;
+            }
+
+            if (username.equals(game.getWhiteUsername())) {
+                chessGame.setWhiteResigned(true);
+            } else if (username.equals(game.getBlackUsername())) {
+                chessGame.setBlackResigned(true);
+            }
+
+            game.setGameState(new Gson().toJson(chessGame));
+
+            DaoService.getInstance().getGameDAO().updateGame(game);
+
+            return true;
+        } catch (Exception e) {
+            System.out.println("Error during resignation process: " + e.getMessage());
+            return false;
+        }
+    }
+
 
 
 
