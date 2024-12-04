@@ -72,26 +72,13 @@ public class WebSocketServer {
                     return;
                 }
 
-                updateGameState(game, move);
-
-                ServerMessage loadGameMessage = new ServerMessage.LoadGameMessage(game);
-                sendMessageToAll(command.getGameID(), loadGameMessage);
-
-                String notificationMessage = "Move made by: " + session.getRemoteAddress();
-                sendMessageToOthers(command.getGameID(), session, new ServerMessage.NotificationMessage(notificationMessage));
+                updateGameState(game, move, session, String.valueOf(authToken));
             }
         } else {
             System.out.println("Invalid command received: " + message);
             sendMessage(session, new ServerMessage.ErrorMessage("Invalid command"));
         }
     }
-
-    //black is attempting to control white or reverse, add in a check to see if the move
-    // that's wanting to be made is the same color as the turn
-
-    //need to make sure person who is calling make move, is the person who is authorized to do it
-
-    //make sure username associated with auth token is the same as the person who is making the move
 
     private boolean validateMove(GameData game, ChessMove move, Session session, String authToken) {
         try {
@@ -104,11 +91,9 @@ public class WebSocketServer {
                 return false;
             }
 
-            // Get the current player's color (whoever turn it is)
             ChessGame.TeamColor currentPlayerColor = chessGame.getTeamTurn();
             System.out.println("Current player color: " + currentPlayerColor);
 
-            // Get the player's username
             String username = getUsernameFromAuthToken(authToken);
             if (username == null) {
                 System.out.println("Error: Invalid or missing username.");
@@ -116,7 +101,6 @@ public class WebSocketServer {
                 return false;
             }
 
-            // Verify if the current player has the correct color based on their username (this should work)
             if (currentPlayerColor == ChessGame.TeamColor.WHITE && !username.equals(game.getWhiteUsername())) {
                 System.out.println("Error: It's White's turn, but the player is not White.");
                 sendMessage(session, new ServerMessage.ErrorMessage("It's White's turn"));
@@ -127,7 +111,7 @@ public class WebSocketServer {
                 return false;
             }
 
-            // move piece
+
             ChessPiece piece = chessGame.getBoard().getPiece(move.getStartPosition());
             if (piece == null) {
                 System.out.println("Error: No piece at the start position.");
@@ -135,14 +119,12 @@ public class WebSocketServer {
                 return false;
             }
 
-            // Check if the piece's color matches the player's turn
             if (piece.getTeamColor() != currentPlayerColor) {
                 System.out.println("Error: Player is trying to move the opponent's piece or it's not their turn.");
                 sendMessage(session, new ServerMessage.ErrorMessage("It's not your turn or you cannot move your opponent's piece"));
                 return false;
             }
 
-            // Check if the move is valid for the piece
             Collection<ChessMove> validMoves = piece.pieceMoves(chessGame.getBoard(), move.getStartPosition());
             if (!validMoves.contains(move)) {
                 System.out.println("Error: Invalid move for this piece.");
@@ -166,9 +148,38 @@ public class WebSocketServer {
         }
     }
 
+    private boolean isGameOver(GameData game, String authToken) {
+        try {
+            ChessGame chessGame = getGameInstanceById(game.getGameID());
+            if (chessGame == null) {
+                System.out.println("Error: No game found with the given gameID.");
+                return false;
+            }
+
+            ChessGame.TeamColor currentPlayerColor = chessGame.getTeamTurn();
+            boolean isCheckmate = chessGame.isInCheckmate(currentPlayerColor);
+            boolean isStalemate = chessGame.isInStalemate(currentPlayerColor);
+
+            if (isCheckmate) {
+                System.out.println("Game Over: Checkmate!");
+                return true;
+            }
+
+            if (isStalemate) {
+                System.out.println("Game Over: Stalemate!");
+                return true;
+            }
+
+            return false;
+
+        } catch (Exception e) {
+            System.out.println("Error in isGameOver: " + e.getMessage());
+            return false;
+        }
+    }
+
+
     private String getUsernameFromAuthToken(String authTokenString) throws DataAccessException {
-        //returning null, not working. I should be able to use a class I already have
-        //AuthToken token = AuthData.getInstance().getAuthToken(authTokenString);
         MySQLAuthTokenDAO authTokenDAO = DaoService.getInstance().getAuthDAO();
 
         AuthToken token = authTokenDAO.getAuthToken(authTokenString);
@@ -183,16 +194,31 @@ public class WebSocketServer {
 
     private ChessGame getGameInstanceById(String gameID) {
         try {
-            GameData gameData = DaoService.getInstance().getGameDAO().getGameByID(gameID);  // Fetch game data
+            GameData gameData = DaoService.getInstance().getGameDAO().getGameByID(gameID);
             if (gameData != null) {
-                ChessGame chessGame = new ChessGame();
-                return chessGame;
+                String gameStateJson = gameData.getGameState();
+
+                if (gameStateJson != null && !gameStateJson.isEmpty()) {
+                    Gson gson = new Gson();
+                    ChessGame chessGame = gson.fromJson(gameStateJson, ChessGame.class);
+
+                    if (chessGame != null) {
+                        return chessGame;
+                    } else {
+                        System.out.println("Error: Failed to deserialize game state for gameID " + gameID);
+                    }
+                } else {
+                    System.out.println("Error: Game state is empty or null for gameID " + gameID);
+                }
+            } else {
+                System.out.println("Error: Game not found with the provided gameID: " + gameID);
             }
         } catch (Exception e) {
-            System.out.println("Error retrieving game: " + e.getMessage());
+            System.out.println("Error retrieving game instance for gameID " + gameID + ": " + e.getMessage());
         }
         return null;
     }
+
 
 
 
@@ -226,9 +252,50 @@ public class WebSocketServer {
 
 
 
-    private void updateGameState(GameData game, ChessMove move) {
-        System.out.println("Move made: " + move);
+    private void updateGameState(GameData game, ChessMove move, Session session, String authToken) {
+        try {
+            ChessGame chessGame = getGameInstanceById(game.getGameID());
+            if (chessGame == null) {
+                return;
+            }
+
+            boolean gameOver = isGameOver(game, authToken);
+            if (gameOver) {
+                sendMessage(session, new ServerMessage.ErrorMessage("Game is over. No moves can be made."));
+                return;
+            }
+
+            ChessPiece piece = chessGame.getBoard().getPiece(move.getStartPosition());
+            if (piece == null) {
+                return;
+            }
+
+            chessGame.getBoard().addPiece(move.getEndPosition(), piece);
+            chessGame.getBoard().addPiece(move.getStartPosition(), null);
+
+            ChessGame.TeamColor currentPlayerColor = chessGame.getTeamTurn();
+            ChessGame.TeamColor nextPlayerColor = currentPlayerColor == ChessGame.TeamColor.WHITE ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
+            chessGame.setTeamTurn(nextPlayerColor);
+
+            gameOver = isGameOver(game, authToken);
+
+            if (gameOver) {
+                return;
+            }
+
+            String updatedGameState = new Gson().toJson(chessGame);
+            game.setGameState(updatedGameState);
+            DaoService.getInstance().getGameDAO().updateGame(game);
+
+            sendMessageToAll(Integer.parseInt(game.getGameID()), new ServerMessage.LoadGameMessage(game));
+            sendMessageToOthers(Integer.parseInt(game.getGameID()), session, new ServerMessage.NotificationMessage("Move made by: " + session.getRemoteAddress()));
+
+        } catch (Exception e) {
+            System.out.println("Error updating game state: " + e.getMessage());
+        }
     }
+
+
 
     private void sendMessageToAll(Integer gameID, ServerMessage message) throws Exception {
         Set<Session> sessions = gameSessions.get(gameID);

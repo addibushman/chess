@@ -16,7 +16,7 @@ public class MySQLGameDAOTest {
 
     @Test
     public void testAddGameSuccess() {
-        GameData game = new GameData(null, "Game 1", "whitePlayer1", "blackPlayer1");
+        GameData game = new GameData(null, "Game 1", "whitePlayer1", "blackPlayer1", null);
         assertDoesNotThrow(() -> gameDAO.createGame(game));
 
         assertDoesNotThrow(() -> {
@@ -30,10 +30,10 @@ public class MySQLGameDAOTest {
 
     @Test
     public void testAddDuplicateGameName() {
-        GameData game1 = new GameData(null, "DuplicateGame", "whitePlayer1", "blackPlayer1");
+        GameData game1 = new GameData(null, "DuplicateGame", "whitePlayer1", "blackPlayer1", null);
         assertDoesNotThrow(() -> gameDAO.createGame(game1));
 
-        GameData game2 = new GameData(null, "DuplicateGame", "whitePlayer2", "blackPlayer2");
+        GameData game2 = new GameData(null, "DuplicateGame", "whitePlayer2", "blackPlayer2", null);
         assertDoesNotThrow(() -> gameDAO.createGame(game2));
 
         assertDoesNotThrow(() -> {
@@ -48,7 +48,7 @@ public class MySQLGameDAOTest {
     @Test
     public void testGetGameByIDSuccess() {
         // Positive case: Successfully retrieve an existing game by ID
-        GameData game = new GameData(null, "RetrieveGame", "whitePlayer", "blackPlayer");
+        GameData game = new GameData(null, "RetrieveGame", "whitePlayer", "blackPlayer", null);
         String gameID = assertDoesNotThrow(() -> gameDAO.createGame(game));
 
         assertDoesNotThrow(() -> {
@@ -69,8 +69,8 @@ public class MySQLGameDAOTest {
 
     @Test
     public void testListGamesSuccess() {
-        GameData game1 = new GameData(null, "ListGame1", "whitePlayer1", "blackPlayer1");
-        GameData game2 = new GameData(null, "ListGame2", "whitePlayer2", "blackPlayer2");
+        GameData game1 = new GameData(null, "ListGame1", "whitePlayer1", "blackPlayer1", null);
+        GameData game2 = new GameData(null, "ListGame2", "whitePlayer2", "blackPlayer2", null);
         assertDoesNotThrow(() -> {
             gameDAO.createGame(game1);
             gameDAO.createGame(game2);
@@ -94,10 +94,10 @@ public class MySQLGameDAOTest {
     @Test
     public void testUpdateGameSuccess() {
         // Positive case: Update an existing game's details
-        GameData game = new GameData(null, "UpdateGame", "whitePlayer", "blackPlayer");
+        GameData game = new GameData(null, "UpdateGame", "whitePlayer", "blackPlayer", null);
         String gameID = assertDoesNotThrow(() -> gameDAO.createGame(game));
 
-        GameData updatedGame = new GameData(gameID, "UpdateGame", "updatedWhitePlayer", "updatedBlackPlayer");
+        GameData updatedGame = new GameData(gameID, "UpdateGame", "updatedWhitePlayer", "updatedBlackPlayer", null);
         assertDoesNotThrow(() -> gameDAO.updateGame(updatedGame));
 
         assertDoesNotThrow(() -> {
@@ -111,15 +111,15 @@ public class MySQLGameDAOTest {
     @Test
     public void testUpdateNonExistentGame() {
         // Negative case: Attempt to update a non-existent game
-        GameData nonExistentGame = new GameData("nonExistentGameID", "NonExistentGame", "whitePlayer", "blackPlayer");
+        GameData nonExistentGame = new GameData("nonExistentGameID", "NonExistentGame", "whitePlayer", "blackPlayer", null);
         assertThrows(DataAccessException.class, () -> gameDAO.updateGame(nonExistentGame), "Updating a non-existent game should throw exception");
     }
 
     @Test
     public void testClearGames() {
         // Positive case: Clear all games and verify no games remain
-        GameData game1 = new GameData(null, "ClearGame1", "whitePlayer1", "blackPlayer1");
-        GameData game2 = new GameData(null, "ClearGame2", "whitePlayer2", "blackPlayer2");
+        GameData game1 = new GameData(null, "ClearGame1", "whitePlayer1", "blackPlayer1", null);
+        GameData game2 = new GameData(null, "ClearGame2", "whitePlayer2", "blackPlayer2", null);
         assertDoesNotThrow(() -> {
             gameDAO.createGame(game1);
             gameDAO.createGame(game2);

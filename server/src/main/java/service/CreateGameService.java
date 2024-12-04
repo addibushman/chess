@@ -15,7 +15,7 @@ public class CreateGameService {
                 return new CreateGameResult(false, "Error Invalid auth token", null);
             }
 
-            GameData newGame = new GameData(null, request.getGameName(), null, null);
+            GameData newGame = new GameData(null, request.getGameName(), null, null, null);
             String gameID = DaoService.getInstance().getGameDAO().createGame(newGame);
 
             return new CreateGameResult(true, "Game created successfully", gameID);

@@ -5,13 +5,15 @@ public class GameData {
     private String gameName;
     private String whiteUsername;
     private String blackUsername;
+    private String gameState;
 
     // Constructor
-    public GameData(String gameID, String gameName, String whiteUsername, String blackUsername) {
+    public GameData(String gameID, String gameName, String whiteUsername, String blackUsername, String gameState) {
         this.gameID = gameID;
         this.gameName = gameName;
         this.whiteUsername = whiteUsername;
         this.blackUsername = blackUsername;
+        this.gameState = gameState;
     }
 
     // Getters and setters
@@ -46,6 +48,16 @@ public class GameData {
     public void setBlackUsername(String blackUsername) {
         this.blackUsername = blackUsername;
     }
+
+    public String getGameState() {
+        return this.gameState = gameState;
+    }
+
+
+    public void setGameState(String gameState) {
+        this.gameState = gameState;
+    }
+
 
     @Override
     public boolean equals(Object o) {
