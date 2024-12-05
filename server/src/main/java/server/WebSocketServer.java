@@ -108,12 +108,6 @@ public class WebSocketServer {
                     return;
                 }
 
-//                boolean isObserver = isObserver(game);
-//                if (isObserver) {
-//                    sendMessageToOthers(command.getGameID(), session, new ServerMessage.NotificationMessage(username + " has left the game."));
-//                } else {
-//                    sendMessageToOthers(command.getGameID(), session, new ServerMessage.NotificationMessage(username + " has left the game."));
-//                }
 
                 handleLeave(session, game, username);
             }
@@ -193,23 +187,39 @@ public class WebSocketServer {
     }
 
     private void handleLeave(Session session, GameData game, String username) throws Exception {
-        //need to write logic to remove the player color (user) from database
-        Set<Session> gameSessionsSet = gameSessions.get(Integer.parseInt(game.getGameID()));
-
-        if (gameSessionsSet == null) {
+        ChessGame chessGame = getGameInstanceById(game.getGameID());
+        if (chessGame == null) {
             return;
         }
 
-        gameSessionsSet.remove(session);
+        Set<Session> gameSessionsSet = gameSessions.get(Integer.parseInt(game.getGameID()));
+        if (gameSessionsSet != null) {
+            gameSessionsSet.remove(session);
+        }
+
+        if (username.equals(game.getWhiteUsername())) {
+            game.setWhiteUsername(null);
+            chessGame.setWhiteResigned(false);
+        } else if (username.equals(game.getBlackUsername())) {
+            game.setBlackUsername(null);
+            chessGame.setBlackResigned(false);
+        }
+
+        DaoService.getInstance().getGameDAO().updateGame(game);
 
         sendMessageToOthers(Integer.parseInt(game.getGameID()), session, new ServerMessage.NotificationMessage(username + " has left the game."));
+
+        if (isObserver(game)) {
+            sendMessageToOthers(Integer.parseInt(game.getGameID()), session, new ServerMessage.NotificationMessage("Observer " + username + " has left the game."));
+        }
     }
 
 
 
 
+
     private boolean isObserver(GameData game) throws DataAccessException {
-        Set<Session> sessions = gameSessions.get(game.getGameID());
+        Set<Session> sessions = gameSessions.get(Integer.parseInt(game.getGameID()));
 
         if (sessions == null) {
             return false;
