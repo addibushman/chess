@@ -18,7 +18,7 @@ import java.util.*;
 @WebSocket
 public class WebSocketServer {
 
-    private static final Map<Integer, Set<Session>> GameSessions = new HashMap<>();
+    private static final Map<Integer, Set<Session>> GAME_SESSIONS = new HashMap<>();
     private Gson gson = new Gson();
 
     @OnWebSocketMessage
@@ -195,7 +195,7 @@ public class WebSocketServer {
             return;
         }
 
-        Set<Session> gameSessionsSet = GameSessions.get(Integer.parseInt(game.getGameID()));
+        Set<Session> gameSessionsSet = GAME_SESSIONS.get(Integer.parseInt(game.getGameID()));
         if (gameSessionsSet != null) {
             gameSessionsSet.remove(session);
         }
@@ -224,7 +224,7 @@ public class WebSocketServer {
 
 
     private boolean isObserver(GameData game) throws DataAccessException {
-        Set<Session> sessions = GameSessions.get(Integer.parseInt(game.getGameID()));
+        Set<Session> sessions = GAME_SESSIONS.get(Integer.parseInt(game.getGameID()));
 
         if (sessions == null) {
             return false;
@@ -431,7 +431,7 @@ public class WebSocketServer {
 
 
     private void sendMessageToAll(Integer gameID, ServerMessage message) throws Exception {
-        Set<Session> sessions = GameSessions.get(gameID);
+        Set<Session> sessions = GAME_SESSIONS.get(gameID);
         if (sessions != null) {
             for (Session s : sessions) {
                 s.getRemote().sendString(gson.toJson(message));
@@ -450,8 +450,8 @@ public class WebSocketServer {
     }
 
     private void addSessionToGame(Integer gameID, Session session) {
-        GameSessions.putIfAbsent(gameID, new HashSet<>());
-        GameSessions.get(gameID).add(session);
+        GAME_SESSIONS.putIfAbsent(gameID, new HashSet<>());
+        GAME_SESSIONS.get(gameID).add(session);
         System.out.println("Session added to game " + gameID);
     }
 
@@ -462,7 +462,7 @@ public class WebSocketServer {
     }
 
     private void sendMessageToOthers(Integer gameID, Session rootSession, ServerMessage message) throws Exception {
-        Set<Session> sessions = GameSessions.get(gameID);
+        Set<Session> sessions = GAME_SESSIONS.get(gameID);
         if (sessions != null) {
             int remainingSessions = sessions.size();
 
