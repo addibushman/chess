@@ -58,16 +58,15 @@ public class WebSocketServer {
                 sendMessageToOthers(command.getGameID(), session, notificationServerMessage);
             }
 
+            String username = getUsernameFromAuthToken(command.getAuthToken());
+            if (username == null) {
+                sendMessage(session, new ServerMessage.ErrorMessage("Invalid username"));
+            }
+
             else if (command.getCommandType() == UserGameCommand.CommandType.RESIGN) {
                 GameData game = getGameByID(command.getGameID());
                 if (game == null) {
                     sendMessage(session, new ServerMessage.ErrorMessage("Invalid Game ID"));
-                    return;
-                }
-
-                String username = getUsernameFromAuthToken(command.getAuthToken());
-                if (username == null) {
-                    sendMessage(session, new ServerMessage.ErrorMessage("Invalid username"));
                     return;
                 }
 
@@ -94,6 +93,29 @@ public class WebSocketServer {
                 }
 
                 updateGameState(game, move, session, String.valueOf(authToken));
+            }
+
+            else if (command.getCommandType() == UserGameCommand.CommandType.LEAVE) {
+                GameData game = getGameByID(command.getGameID());
+                if (game == null) {
+                    sendMessage(session, new ServerMessage.ErrorMessage("Invalid Game ID"));
+                    return;
+                }
+
+                String userName = getUsernameFromAuthToken(command.getAuthToken());
+                if (userName == null) {
+                    sendMessage(session, new ServerMessage.ErrorMessage("Invalid username"));
+                    return;
+                }
+
+//                boolean isObserver = isObserver(game);
+//                if (isObserver) {
+//                    sendMessageToOthers(command.getGameID(), session, new ServerMessage.NotificationMessage(username + " has left the game."));
+//                } else {
+//                    sendMessageToOthers(command.getGameID(), session, new ServerMessage.NotificationMessage(username + " has left the game."));
+//                }
+
+                handleLeave(session, game, username);
             }
         } else {
             System.out.println("Invalid command received: " + message);
@@ -168,6 +190,38 @@ public class WebSocketServer {
             System.out.println("Error in validateMove: " + e.getMessage());
             return false;
         }
+    }
+
+    private void handleLeave(Session session, GameData game, String username) throws Exception {
+        //need to write logic to remove the player color (user) from database
+        Set<Session> gameSessionsSet = gameSessions.get(Integer.parseInt(game.getGameID()));
+
+        if (gameSessionsSet == null) {
+            return;
+        }
+
+        gameSessionsSet.remove(session);
+
+        sendMessageToOthers(Integer.parseInt(game.getGameID()), session, new ServerMessage.NotificationMessage(username + " has left the game."));
+    }
+
+
+
+
+    private boolean isObserver(GameData game) throws DataAccessException {
+        Set<Session> sessions = gameSessions.get(game.getGameID());
+
+        if (sessions == null) {
+            return false;
+        }
+
+        for (Session s : sessions) {
+            String username = getUsernameFromAuthToken(s.getRemoteAddress().toString());
+            if (username != null && !username.equals(game.getWhiteUsername()) && !username.equals(game.getBlackUsername())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean isGameOver(GameData game, String authToken) {
@@ -321,7 +375,7 @@ public class WebSocketServer {
         }
     }
 
-    private boolean processResignation(GameData game, String username, Session session) {
+    private boolean processResignation(GameData game, String username, Session session) throws Exception {
         try {
             ChessGame chessGame = getGameInstanceById(game.getGameID());
             if (chessGame == null) {
@@ -331,7 +385,10 @@ public class WebSocketServer {
 
             if (!(username.equals(game.getWhiteUsername()) || username.equals(game.getBlackUsername()))) {
                 System.out.println("Error: Only players can resign.");
-                sendMessage(session, new ServerMessage.ErrorMessage("Only a player can resign"));
+                return false;
+            }
+
+            if (chessGame.getWhiteResigned() || chessGame.getBlackResigned()) {
                 return false;
             }
 
@@ -342,12 +399,12 @@ public class WebSocketServer {
             }
 
             game.setGameState(new Gson().toJson(chessGame));
-
             DaoService.getInstance().getGameDAO().updateGame(game);
 
             return true;
         } catch (Exception e) {
             System.out.println("Error during resignation process: " + e.getMessage());
+            sendMessage(session, new ServerMessage.ErrorMessage("Error processing resignation"));
             return false;
         }
     }
@@ -389,14 +446,26 @@ public class WebSocketServer {
     private void sendMessageToOthers(Integer gameID, Session rootSession, ServerMessage message) throws Exception {
         Set<Session> sessions = gameSessions.get(gameID);
         if (sessions != null) {
-            for (Session s : sessions) {
-                if (!s.equals(rootSession)) {
-                    s.getRemote().sendString(gson.toJson(message));
-                    System.out.println("Sent notification to other client in game " + gameID + ": " + gson.toJson(message));
+            int remainingSessions = sessions.size();
+
+            if (remainingSessions > 1) {
+                for (Session s : sessions) {
+                    if (!s.equals(rootSession)) {
+                        s.getRemote().sendString(gson.toJson(message));
+                        System.out.println("Sent notification to other client in game " + gameID + ": " + gson.toJson(message));
+                    }
+                }
+            } else {
+                for (Session s : sessions) {
+                    if (!s.equals(rootSession)) {
+                        s.getRemote().sendString(gson.toJson(message));
+                        System.out.println("Sent notification to the last player in game " + gameID + ": " + gson.toJson(message));
+                    }
                 }
             }
         }
     }
+
 
     private UserGameCommand parseCommand(String message) {
         try {
