@@ -46,13 +46,4 @@ public class WebSocketServerFacade extends Endpoint {
         System.out.println("WebSocket connection opened.");
     }
 
-    @OnClose
-    public void onClose(Session session, CloseReason closeReason) {
-        System.out.println("WebSocket connection closed: " + closeReason.getReasonPhrase());
-    }
-
-    @OnError
-    public void onError(Session session, Throwable throwable) {
-        System.out.println("WebSocket error occurred: " + throwable.getMessage());
-    }
 }

@@ -50,16 +50,13 @@ public class ServerMessage {
         return this.game;
     }
 
-    public String getErrorMessage() {
-        return errorMessage;  // Return the error message
-    }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ServerMessage)) return false;
+        {if (this == o) return true;}
+        {if (!(o instanceof ServerMessage)) return false;
         ServerMessage that = (ServerMessage) o;
-        return getServerMessageType() == that.getServerMessageType();
+        return getServerMessageType() == that.getServerMessageType();}
     }
 
     @Override

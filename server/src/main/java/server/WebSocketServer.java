@@ -18,7 +18,7 @@ import java.util.*;
 @WebSocket
 public class WebSocketServer {
 
-    private static final Map<Integer, Set<Session>> gameSessions = new HashMap<>();
+    private static final Map<Integer, Set<Session>> GameSessions = new HashMap<>();
     private Gson gson = new Gson();
 
     @OnWebSocketMessage
@@ -54,7 +54,8 @@ public class WebSocketServer {
                 ServerMessage serverMessage = new ServerMessage.LoadGameMessage(game);
                 sendMessage(session, serverMessage);
 
-                ServerMessage notificationServerMessage = new ServerMessage.NotificationMessage("Player has connected: " + session.getRemoteAddress());
+                ServerMessage notificationServerMessage = new ServerMessage.NotificationMessage
+                        ("Player has connected: " + session.getRemoteAddress());
                 sendMessageToOthers(command.getGameID(), session, notificationServerMessage);
             }
 
@@ -72,7 +73,8 @@ public class WebSocketServer {
 
                 boolean resignSuccess = processResignation(game, username, session);
                 if (resignSuccess) {
-                    sendMessageToAll(command.getGameID(), new ServerMessage.NotificationMessage(username + " has resigned. Game Over."));
+                    sendMessageToAll(command.getGameID(), new ServerMessage.NotificationMessage
+                            (username + " has resigned. Game Over."));
                 } else {
                     sendMessage(session, new ServerMessage.ErrorMessage("Only a player can resign."));
                 }
@@ -159,7 +161,8 @@ public class WebSocketServer {
 
             if (piece.getTeamColor() != currentPlayerColor) {
                 System.out.println("Error: Player is trying to move the opponent's piece or it's not their turn.");
-                sendMessage(session, new ServerMessage.ErrorMessage("It's not your turn or you cannot move your opponent's piece"));
+                sendMessage(session, new ServerMessage.ErrorMessage
+                        ("It's not your turn or you cannot move your opponent's piece"));
                 return false;
             }
 
@@ -192,7 +195,7 @@ public class WebSocketServer {
             return;
         }
 
-        Set<Session> gameSessionsSet = gameSessions.get(Integer.parseInt(game.getGameID()));
+        Set<Session> gameSessionsSet = GameSessions.get(Integer.parseInt(game.getGameID()));
         if (gameSessionsSet != null) {
             gameSessionsSet.remove(session);
         }
@@ -207,10 +210,12 @@ public class WebSocketServer {
 
         DaoService.getInstance().getGameDAO().updateGame(game);
 
-        sendMessageToOthers(Integer.parseInt(game.getGameID()), session, new ServerMessage.NotificationMessage(username + " has left the game."));
+        sendMessageToOthers(Integer.parseInt(game.getGameID()), session,
+                new ServerMessage.NotificationMessage(username + " has left the game."));
 
         if (isObserver(game)) {
-            sendMessageToOthers(Integer.parseInt(game.getGameID()), session, new ServerMessage.NotificationMessage("Observer " + username + " has left the game."));
+            sendMessageToOthers(Integer.parseInt(game.getGameID()), session,
+                    new ServerMessage.NotificationMessage("Observer " + username + " has left the game."));
         }
     }
 
@@ -219,7 +224,7 @@ public class WebSocketServer {
 
 
     private boolean isObserver(GameData game) throws DataAccessException {
-        Set<Session> sessions = gameSessions.get(Integer.parseInt(game.getGameID()));
+        Set<Session> sessions = GameSessions.get(Integer.parseInt(game.getGameID()));
 
         if (sessions == null) {
             return false;
@@ -227,7 +232,8 @@ public class WebSocketServer {
 
         for (Session s : sessions) {
             String username = getUsernameFromAuthToken(s.getRemoteAddress().toString());
-            if (username != null && !username.equals(game.getWhiteUsername()) && !username.equals(game.getBlackUsername())) {
+            if (username != null && !username.equals(game.getWhiteUsername()) &&
+                    !username.equals(game.getBlackUsername())) {
                 return true;
             }
         }
@@ -364,7 +370,8 @@ public class WebSocketServer {
             chessGame.getBoard().addPiece(move.getStartPosition(), null);
 
             ChessGame.TeamColor currentPlayerColor = chessGame.getTeamTurn();
-            ChessGame.TeamColor nextPlayerColor = currentPlayerColor == ChessGame.TeamColor.WHITE ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
+            ChessGame.TeamColor nextPlayerColor = currentPlayerColor ==
+                    ChessGame.TeamColor.WHITE ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
             chessGame.setTeamTurn(nextPlayerColor);
 
             gameOver = isGameOver(game, authToken);
@@ -378,7 +385,8 @@ public class WebSocketServer {
             DaoService.getInstance().getGameDAO().updateGame(game);
 
             sendMessageToAll(Integer.parseInt(game.getGameID()), new ServerMessage.LoadGameMessage(game));
-            sendMessageToOthers(Integer.parseInt(game.getGameID()), session, new ServerMessage.NotificationMessage("Move made by: " + session.getRemoteAddress()));
+            sendMessageToOthers(Integer.parseInt(game.getGameID()), session,
+                    new ServerMessage.NotificationMessage("Move made by: " + session.getRemoteAddress()));
 
         } catch (Exception e) {
             System.out.println("Error updating game state: " + e.getMessage());
@@ -423,7 +431,7 @@ public class WebSocketServer {
 
 
     private void sendMessageToAll(Integer gameID, ServerMessage message) throws Exception {
-        Set<Session> sessions = gameSessions.get(gameID);
+        Set<Session> sessions = GameSessions.get(gameID);
         if (sessions != null) {
             for (Session s : sessions) {
                 s.getRemote().sendString(gson.toJson(message));
@@ -442,8 +450,8 @@ public class WebSocketServer {
     }
 
     private void addSessionToGame(Integer gameID, Session session) {
-        gameSessions.putIfAbsent(gameID, new HashSet<>());
-        gameSessions.get(gameID).add(session);
+        GameSessions.putIfAbsent(gameID, new HashSet<>());
+        GameSessions.get(gameID).add(session);
         System.out.println("Session added to game " + gameID);
     }
 
@@ -454,7 +462,7 @@ public class WebSocketServer {
     }
 
     private void sendMessageToOthers(Integer gameID, Session rootSession, ServerMessage message) throws Exception {
-        Set<Session> sessions = gameSessions.get(gameID);
+        Set<Session> sessions = GameSessions.get(gameID);
         if (sessions != null) {
             int remainingSessions = sessions.size();
 
@@ -462,14 +470,16 @@ public class WebSocketServer {
                 for (Session s : sessions) {
                     if (!s.equals(rootSession)) {
                         s.getRemote().sendString(gson.toJson(message));
-                        System.out.println("Sent notification to other client in game " + gameID + ": " + gson.toJson(message));
+                        System.out.println("Sent notification to other client in game " + gameID + ": " +
+                                gson.toJson(message));
                     }
                 }
             } else {
                 for (Session s : sessions) {
                     if (!s.equals(rootSession)) {
                         s.getRemote().sendString(gson.toJson(message));
-                        System.out.println("Sent notification to the last player in game " + gameID + ": " + gson.toJson(message));
+                        System.out.println("Sent notification to the last player in game " + gameID + ": " +
+                                gson.toJson(message));
                     }
                 }
             }
